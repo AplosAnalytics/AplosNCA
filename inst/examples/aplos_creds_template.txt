@@ -1,0 +1,5 @@
+APLOS_API_URL="your_api_url_eg_https://api.app.aplos-nca.com"
+COGNITO_CLIENT_KEY="your_cognito_client_id/key"
+COGNITO_USER_NAME="your_username"
+COGNITO_PASSWORD="your_password"
+COGNITO_REGION="your_aws_region"

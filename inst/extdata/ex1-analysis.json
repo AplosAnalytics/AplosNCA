@@ -1,0 +1,95 @@
+{
+  "partialAuc": [],
+  "metadata": {
+    "metaDataItems": []
+  },
+  "designations": {
+    "missing": {
+      "column": null,
+      "value": "NS"
+    },
+    "concentrationUnit": {
+      "column": "conc.unit",
+      "value": null
+    },
+    "blq": {
+      "column": null,
+      "value": "BLQ"
+    }
+  },
+  "columns": {
+    "concentration": {
+      "analyzed": "conc",
+      "observed": "conc.obs"
+    },
+    "time": "time",
+    "customColumns": [],
+    "grouping": [
+      "subject"
+    ],
+    "uniqueId": "subject",
+    "sorting": [
+      "time"
+    ]
+  },
+  "sparseData": false,
+  "description": "Simple Extravascular Analysis",
+  "time": {
+    "tau": {
+      "column": null,
+      "value": 24
+    },
+    "unit": {
+      "column": "time.unit",
+      "value": null
+    },
+    "timeOfAdministration": {
+      "column": null,
+      "value": 0
+    },
+    "infusion": {
+      "protocol": {
+        "column": null,
+        "value": "rate"
+      },
+      "amount": {
+        "column": null,
+        "value": "1"
+      }
+    }
+  },
+  "dosing": {
+    "amount": {
+      "column": "Dose.amt",
+      "value": null
+    },
+    "unit": {
+      "column": "Dose.unit",
+      "value": null
+    },
+    "type": {
+      "column": null,
+      "value": "ev"
+    },
+    "frequency": {
+      "column": null,
+      "value": "single"
+    }
+  },
+  "type": "nca_analysis_configuration",
+  "version": "",
+  "kelRules": {
+    "minimumSpan": 0,
+    "maximumExtrapolationLogarithmic": 0,
+    "tie": [
+      "kel_n",
+      "kel_lower"
+    ],
+    "maximumExtrapolationLinear": 0,
+    "earliestTimePoint": 0,
+    "minimumStatistic": 0,
+    "maximumTimePoints": 0,
+    "regressionStatistic": "adj_r2",
+    "kelMethod": 1
+  }
+}

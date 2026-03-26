@@ -1,0 +1,62 @@
+{
+  "output": {
+    "sort": [
+      "subject",
+      "day",
+      "kel_group",
+      "paramcd"
+    ]
+  },
+  "calculations": [
+    {
+      "uniqueId": "subject",
+      "parameter": "Relative Bioavailability based on Cmax",
+      "description": "Cmax Relative F",
+      "paramcd": "Frel_Cmax",
+      "type": "ratio",
+      "numerator": {
+        "conditions": [
+          {
+            "column": "trta",
+            "value": "Fed"
+          }
+        ],
+        "paramcd": "Cmax"
+      },
+      "denominator": {
+        "conditions": [
+          {
+            "column": "trta",
+            "value": "Fasted"
+          }
+        ],
+        "paramcd": "Cmax"
+      }
+    },
+    {
+      "uniqueId": "subject",
+      "parameter": "Relative Bioavailability based on AUCall",
+      "description": "AUC Relative F",
+      "paramcd": "Frel_AUC",
+      "type": "ratio",
+      "numerator": {
+        "conditions": [
+          {
+            "column": "trta",
+            "value": "Fed"
+          }
+        ],
+        "paramcd": "AUC_all_log"
+      },
+      "denominator": {
+        "conditions": [
+          {
+            "column": "trta",
+            "value": "Fasted"
+          }
+        ],
+        "paramcd": "AUC_all_log"
+      }
+    }
+  ]
+}

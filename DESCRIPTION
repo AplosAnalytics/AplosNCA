@@ -1,0 +1,24 @@
+Package: AplosNCA
+Title: Use Aplos NCA API For Pharmacokinetic Analysis
+Version: 0.0.0.9000
+Authors@R: 
+    person("Nathan", "Teuscher", , "nathan@aplosanalytics.com", role = c("aut", "cre"))
+Description: Using this package you can interact with the Aplos NCA API using standard R functions. This will allow you to authenticate with your Aplos NCA account, upload input datasets, initiate analyses, and download results.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+VignetteBuilder: knitr
+Imports: 
+    AzureAuth,
+    httr,
+    jsonlite,
+    stringr
+Suggests: 
+    httptest2,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    withr,
+    downloader
+Config/testthat/edition: 3

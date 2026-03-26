@@ -1,0 +1,208 @@
+{
+  "plots": [
+    {
+      "yAxisColumnName": "PKLEVEL",
+      "breakValue": 4,
+      "description": "Spaghetti plot (linear) Fasted",
+      "source": "Food-effect-data-v2.csv",
+      "title": "Spaghetti Plot Fasted",
+      "type": "all_individual_linear",
+      "yUnitsColumn": "conc_units",
+      "xUnitsColumn": "time_units",
+      "colorGroupColumnName": "subject",
+      "xAxisLabel": "Time ({{value}})",
+      "filename": "",
+      "colorGroupLabelName": "Subject ID",
+      "theme": "bw",
+      "xAxisColumnName": "time",
+      "conditions": [
+        {
+          "column": "trta",
+          "values": [
+            "Fasted"
+          ]
+        }
+      ],
+      "yAxisLabel": "Concentration ({{value}})"
+    },
+    {
+      "yAxisColumnName": "PKLEVEL",
+      "breakValue": 4,
+      "description": "Spaghetti plot (semilog) Fasted",
+      "source": "Food-effect-data-v2.csv",
+      "title": "Spaghetti Plot Fasted",
+      "type": "all_individual_semilog",
+      "yUnitsColumn": "conc_units",
+      "xUnitsColumn": "time_units",
+      "colorGroupColumnName": "subject",
+      "xAxisLabel": "Time ({{value}})",
+      "filename": "",
+      "colorGroupLabelName": "Subject ID",
+      "theme": "bw",
+      "xAxisColumnName": "time",
+      "conditions": [
+        {
+          "column": "trta",
+          "values": [
+            "Fasted"
+          ]
+        }
+      ],
+      "yAxisLabel": "Concentration ({{value}})"
+    },
+    {
+      "yAxisColumnName": "PKLEVEL",
+      "breakValue": 4,
+      "description": "Spaghetti plot (linear) Fed",
+      "source": "Food-effect-data-v2.csv",
+      "title": "Spaghetti Plot Fasted",
+      "type": "all_individual_linear",
+      "yUnitsColumn": "conc_units",
+      "xUnitsColumn": "time_units",
+      "colorGroupColumnName": "subject",
+      "xAxisLabel": "Time ({{value}})",
+      "filename": "",
+      "colorGroupLabelName": "Subject ID",
+      "theme": "bw",
+      "xAxisColumnName": "time",
+      "conditions": [
+        {
+          "column": "trta",
+          "values": [
+            "Fed"
+          ]
+        }
+      ],
+      "yAxisLabel": "Concentration ({{value}})"
+    },
+    {
+      "yAxisColumnName": "PKLEVEL",
+      "breakValue": 4,
+      "description": "Spaghetti plot (semilog) Fed",
+      "source": "Food-effect-data-v2.csv",
+      "title": "Spaghetti Plot Fasted",
+      "type": "all_individual_semilog",
+      "yUnitsColumn": "conc_units",
+      "xUnitsColumn": "time_units",
+      "colorGroupColumnName": "subject",
+      "xAxisLabel": "Time ({{value}})",
+      "filename": "",
+      "colorGroupLabelName": "Subject ID",
+      "theme": "bw",
+      "xAxisColumnName": "time",
+      "conditions": [
+        {
+          "column": "trta",
+          "values": [
+            "Fed"
+          ]
+        }
+      ],
+      "yAxisLabel": "Concentration ({{value}})"
+    },
+    {
+      "yAxisColumnName": "PKLEVEL",
+      "breakValue": "4",
+      "description": "Mean plot (linear)",
+      "source": "Food-effect-data-v2.csv",
+      "title": "Mean plot Fed vs Fasted",
+      "type": "mean_linear",
+      "yUnitsColumn": "conc_units",
+      "xUnitsColumn": "time_units",
+      "colorGroupColumnName": "trta",
+      "xAxisLabel": "Time ({{value}})",
+      "showErrorBars": "False",
+      "filename": "",
+      "colorGroupLabelName": "Treatment",
+      "theme": "bw",
+      "xAxisColumnName": "time",
+      "statsFunction": "mean",
+      "conditions": [],
+      "yAxisLabel": "Concentration ({{value}})",
+      "aggregateBy": [
+        "trta",
+        "time"
+      ]
+    },
+    {
+      "yAxisColumnName": "PKLEVEL",
+      "breakValue": "4",
+      "description": "Mean plot (semilog)",
+      "source": "Food-effect-data-v2.csv",
+      "title": "Mean plot Fed vs Fasted",
+      "type": "mean_semilog",
+      "yUnitsColumn": "conc_units",
+      "xUnitsColumn": "time_units",
+      "colorGroupColumnName": "trta",
+      "xAxisLabel": "Time ({{value}})",
+      "showErrorBars": "False",
+      "filename": "",
+      "colorGroupLabelName": "Treatment",
+      "theme": "bw",
+      "xAxisColumnName": "time",
+      "statsFunction": "mean",
+      "conditions": [],
+      "yAxisLabel": "Concentration ({{value}})",
+      "aggregateBy": [
+        "trta",
+        "time"
+      ]
+    },
+    {
+      "pointOptions": {
+        "color": "#000000"
+      },
+      "yAxisColumnName": "PKLEVEL",
+      "breakValue": 4,
+      "description": "Individual plot (linear)",
+      "source": "Food-effect-data-v2.csv",
+      "title": "",
+      "type": "individual_linear",
+      "yUnitsColumn": "conc_units",
+      "xUnitsColumn": "time_units",
+      "showGrid": false,
+      "colorGroupColumnName": "trta",
+      "lineOptions": {
+        "show": true
+      },
+      "xAxisLabel": "Time ({{value}})",
+      "colorGroupLabelName": "Treatment",
+      "groupBy": [
+        "subject",
+        "trta"
+      ],
+      "theme": "bw",
+      "xAxisColumnName": "time",
+      "conditions": [],
+      "yAxisLabel": "Concentration ({{value}})"
+    },
+    {
+      "pointOptions": {
+        "color": "#000000"
+      },
+      "yAxisColumnName": "PKLEVEL",
+      "breakValue": 4,
+      "description": "Individual plot (semilog)",
+      "source": "Food-effect-data-v2.csv",
+      "title": "",
+      "type": "individual_semilog",
+      "yUnitsColumn": "conc_units",
+      "xUnitsColumn": "time_units",
+      "showGrid": false,
+      "colorGroupColumnName": "trta",
+      "lineOptions": {
+        "show": true
+      },
+      "xAxisLabel": "Time ({{value}})",
+      "colorGroupLabelName": "Treatment",
+      "groupBy": [
+        "subject",
+        "trta"
+      ],
+      "theme": "bw",
+      "xAxisColumnName": "time",
+      "conditions": [],
+      "yAxisLabel": "Concentration ({{value}})"
+    }
+  ]
+}

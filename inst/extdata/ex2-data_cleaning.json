@@ -1,0 +1,195 @@
+{
+  "rules": [
+    {
+      "columnName": "time_units",
+      "description": "Add time units",
+      "value": "h",
+      "type": "add_column"
+    },
+    {
+      "columnName": "conc_units",
+      "description": "Add concentration units",
+      "value": "ng/mL",
+      "type": "add_column"
+    },
+    {
+      "columnName": "dose_units",
+      "description": "Add dose units",
+      "value": "ug",
+      "type": "add_column"
+    },
+    {
+      "sourceColumn": "dose",
+      "destinationColumn": "dose2",
+      "column": "",
+      "description": "Convert Dose to mg",
+      "type": "conversion",
+      "value": 1000,
+      "operator": "/"
+    },
+    {
+      "columnName": "dose2_units",
+      "description": "Add dose2 units",
+      "value": "mg",
+      "type": "add_column"
+    },
+    {
+      "description": "BLQ - Set all BLQ value to 'N'",
+      "rules": [
+        {
+          "type": "sort",
+          "columns": [
+            "time"
+          ],
+          "direction": "asc"
+        },
+        {
+          "type": "mapping",
+          "columns": [
+            {
+              "sourceColumn": "conc",
+              "destinationColumn": "PKLEVEL"
+            }
+          ]
+        },
+        {
+          "type": "conditional",
+          "conditions": [
+            {
+              "expressions": [
+                {
+                  "column": "conc",
+                  "value": "BLQ",
+                  "operator": "=="
+                }
+              ],
+              "action": {
+                "assign": {
+                  "column": "PKLEVEL",
+                  "value": 0
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "type": "grouping",
+      "columns": [
+        "subject",
+        "period"
+      ]
+    },
+    {
+      "description": "BLQ based on first observation",
+      "rules": [
+        {
+          "type": "sort",
+          "columns": [
+            "time"
+          ],
+          "direction": "asc"
+        },
+        {
+          "sourceColumn": "conc",
+          "destinationColumn": "BLQ_FLAG",
+          "at": 1,
+          "after": 2,
+          "type": "flag_first_observation",
+          "before": 0
+        },
+        {
+          "type": "mapping",
+          "columns": [
+            {
+              "sourceColumn": "conc",
+              "destinationColumn": "PKLEVEL2"
+            }
+          ]
+        },
+        {
+          "type": "conditional",
+          "conditions": [
+            {
+              "expressions": [
+                {
+                  "column": "conc",
+                  "value": "BLQ",
+                  "operator": "=="
+                },
+                {
+                  "column": "BLQ_FLAG",
+                  "value": 0.0,
+                  "operator": "=="
+                }
+              ],
+              "action": {
+                "assign": {
+                  "column": "PKLEVEL2",
+                  "value": 0
+                }
+              }
+            },
+            {
+              "expressions": [
+                {
+                  "column": "BLQ_FLAG",
+                  "value": "",
+                  "operator": "=="
+                }
+              ],
+              "action": {
+                "assign": {
+                  "column": "PKLEVEL2",
+                  "value": 0
+                }
+              }
+            },
+            {
+              "expressions": [
+                {
+                  "column": "conc",
+                  "value": "BLQ",
+                  "operator": "=="
+                },
+                {
+                  "column": "BLQ_FLAG",
+                  "value": 1.0,
+                  "operator": ">"
+                }
+              ],
+              "action": {
+                "assign": {
+                  "column": "PKLEVEL2",
+                  "value": ""
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "type": "grouping",
+      "columns": [
+        "subject",
+        "period"
+      ]
+    },
+    {
+      "columnName": "day_text",
+      "description": "Add Study Day text",
+      "value": "Day 1",
+      "type": "add_column"
+    },
+    {
+      "regex": false,
+      "sourceColumn": "day",
+      "destinationColumn": "day_text",
+      "find": 7,
+      "replace": "Day 7",
+      "description": "Update Study Day for Day 7",
+      "type": "find_replace"
+    }
+  ],
+  "output": {
+    "fileName": "Food-effect-data-v2.csv"
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "partialAuc": [],
+  "metadata": {
+    "metaDataItems": []
+  },
+  "designations": {
+    "missing": {
+      "column": null,
+      "value": "NS"
+    },
+    "concentrationUnit": {
+      "column": "conc_units",
+      "value": null
+    },
+    "blq": {
+      "column": null,
+      "value": "BLQ"
+    }
+  },
+  "columns": {
+    "concentration": {
+      "analyzed": "PKLEVEL2",
+      "observed": "conc"
+    },
+    "time": "time",
+    "customColumns": [
+      "day",
+      "period",
+      "sex",
+      "day_text"
+    ],
+    "grouping": [
+      "subject",
+      "trta"
+    ],
+    "uniqueId": "subject",
+    "sorting": [
+      "time"
+    ]
+  },
+  "sparseData": false,
+  "description": "Draft analysis study CL-FE-001",
+  "time": {
+    "tau": {
+      "column": null,
+      "value": 24
+    },
+    "unit": {
+      "column": "time_units",
+      "value": null
+    },
+    "timeOfAdministration": {
+      "column": null,
+      "value": 0
+    },
+    "infusion": {
+      "protocol": {
+        "column": null,
+        "value": "rate"
+      },
+      "amount": {
+        "column": null,
+        "value": "1"
+      }
+    }
+  },
+  "dosing": {
+    "amount": {
+      "column": "dose2",
+      "value": null
+    },
+    "unit": {
+      "column": "dose_units",
+      "value": null
+    },
+    "type": {
+      "column": null,
+      "value": "ev"
+    },
+    "frequency": {
+      "column": null,
+      "value": "single"
+    }
+  },
+  "type": "nca_analysis_configuration",
+  "version": "",
+  "kelRules": {
+    "minimumSpan": 0,
+    "maximumExtrapolationLogarithmic": 0,
+    "tie": [
+      "kel_n",
+      "kel_lower"
+    ],
+    "maximumExtrapolationLinear": 0,
+    "earliestTimePoint": 0,
+    "minimumStatistic": 0,
+    "maximumTimePoints": 0,
+    "regressionStatistic": "adj_r2",
+    "kelMethod": 1
+  }
+}

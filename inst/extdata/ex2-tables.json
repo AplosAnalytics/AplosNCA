@@ -1,0 +1,674 @@
+{
+  "tables": [
+    {
+      "fileName": "",
+      "columns": [
+        {
+          "sigfig": "",
+          "display": false,
+          "decimals": "",
+          "name": "subject",
+          "format": "",
+          "label": "Subject ID",
+          "type": "unique_id"
+        },
+        {
+          "sigfig": "",
+          "display": "single_row",
+          "decimals": "",
+          "name": "trta",
+          "format": "",
+          "label": "Treatment",
+          "type": "pass"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Cmax",
+          "format": "",
+          "label": "Cmax",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Tmax",
+          "format": "",
+          "label": "Tmax",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 4,
+          "display": "",
+          "decimals": "",
+          "name": "AUC_all_log",
+          "format": "",
+          "label": "AUCall",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 3,
+          "display": "",
+          "decimals": "",
+          "name": "Frel_Cmax",
+          "format": "",
+          "label": "Frel (Cmax)",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Frel_AUC",
+          "format": "",
+          "label": "Frel (AUC)",
+          "type": "statistical"
+        }
+      ],
+      "description": "Summary PK Parameters Fed",
+      "groups": [
+        "trta"
+      ],
+      "source": "pk-results-custom-calcs.csv",
+      "title": "Summary Parameters",
+      "type": "summary_pk_parameters",
+      "replacementMapping": [],
+      "layout": {},
+      "stats": [],
+      "subtitle": "Fed",
+      "styles": [],
+      "conditions": [
+        {
+          "column": "trta",
+          "value": "Fed"
+        }
+      ],
+      "statsCompact": false
+    },
+    {
+      "fileName": "",
+      "columns": [
+        {
+          "sigfig": "",
+          "display": true,
+          "decimals": "",
+          "name": "subject",
+          "format": "",
+          "label": "Subject ID",
+          "type": "unique_id"
+        },
+        {
+          "sigfig": "",
+          "display": true,
+          "decimals": "",
+          "name": "trta",
+          "format": "",
+          "label": "Treatment",
+          "type": "pass"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Cmax",
+          "format": "",
+          "label": "Cmax",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Tmax",
+          "format": "",
+          "label": "Tmax",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 4,
+          "display": "",
+          "decimals": "",
+          "name": "AUC_all_log",
+          "format": "",
+          "label": "AUCall",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 3,
+          "display": "",
+          "decimals": "",
+          "name": "Frel_Cmax",
+          "format": "",
+          "label": "Frel (Cmax)",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Frel_AUC",
+          "format": "",
+          "label": "Frel (AUC)",
+          "type": "statistical"
+        }
+      ],
+      "description": "Individual & Summary PK Parameters Fed",
+      "groups": [
+        "trta"
+      ],
+      "source": "pk-results-custom-calcs.csv",
+      "title": "Individual and Summary Parameters",
+      "type": "individual_summary_pk_parameters",
+      "replacementMapping": [],
+      "layout": {},
+      "stats": [
+        {
+          "name": "N",
+          "index": 1,
+          "display": true
+        },
+        {
+          "name": "Mean",
+          "index": 2,
+          "display": true
+        },
+        {
+          "name": "SD",
+          "index": 3,
+          "display": true
+        },
+        {
+          "name": "Minimum",
+          "index": 4,
+          "display": true
+        },
+        {
+          "name": "Median",
+          "index": 5,
+          "display": true
+        },
+        {
+          "name": "Maximum",
+          "index": 6,
+          "display": true
+        },
+        {
+          "name": "GeometricMean",
+          "index": 7,
+          "display": true
+        },
+        {
+          "name": "GeometricCVP",
+          "index": 8,
+          "display": true
+        }
+      ],
+      "subtitle": "Fed",
+      "styles": [],
+      "conditions": [
+        {
+          "column": "trta",
+          "value": "Fed"
+        }
+      ],
+      "statsCompact": false
+    },
+    {
+      "fileName": "",
+      "columns": [
+        {
+          "sigfig": "",
+          "display": false,
+          "decimals": "",
+          "name": "subject",
+          "format": "",
+          "label": "Subject ID",
+          "type": "unique_id"
+        },
+        {
+          "sigfig": "",
+          "display": "single_row",
+          "decimals": "",
+          "name": "trta",
+          "format": "",
+          "label": "Treatment",
+          "type": "pass"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Cmax",
+          "format": "",
+          "label": "Cmax",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Tmax",
+          "format": "",
+          "label": "Tmax",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 4,
+          "display": "",
+          "decimals": "",
+          "name": "AUC_all_log",
+          "format": "",
+          "label": "AUCall",
+          "type": "statistical"
+        }
+      ],
+      "description": "Summary PK Parameters Fasted",
+      "groups": [
+        "trta"
+      ],
+      "source": "pk-results-custom-calcs.csv",
+      "title": "Summary Parameters",
+      "type": "summary_pk_parameters",
+      "replacementMapping": [],
+      "layout": {},
+      "stats": [
+        {
+          "name": "N",
+          "index": 1,
+          "display": true
+        },
+        {
+          "name": "Mean",
+          "index": 2,
+          "display": true
+        },
+        {
+          "name": "SD",
+          "index": 3,
+          "display": true
+        },
+        {
+          "name": "Minimum",
+          "index": 4,
+          "display": true
+        },
+        {
+          "name": "Median",
+          "index": 5,
+          "display": true
+        },
+        {
+          "name": "Maximum",
+          "index": 6,
+          "display": true
+        },
+        {
+          "name": "GeometricMean",
+          "index": 7,
+          "display": true
+        },
+        {
+          "name": "GeometricCVP",
+          "index": 8,
+          "display": true
+        }
+      ],
+      "subtitle": "Fasted",
+      "styles": [],
+      "conditions": [
+        {
+          "column": "trta",
+          "value": "Fasted"
+        }
+      ],
+      "statsCompact": false
+    },
+    {
+      "fileName": "",
+      "columns": [
+        {
+          "sigfig": "",
+          "display": true,
+          "decimals": "",
+          "name": "subject",
+          "format": "",
+          "label": "Subject ID",
+          "type": "unique_id"
+        },
+        {
+          "sigfig": "",
+          "display": true,
+          "decimals": "",
+          "name": "trta",
+          "format": "",
+          "label": "Treatment",
+          "type": "pass"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Cmax",
+          "format": "",
+          "label": "Cmax",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 3,
+          "display": true,
+          "decimals": "",
+          "name": "Tmax",
+          "format": "",
+          "label": "Tmax",
+          "type": "statistical"
+        },
+        {
+          "sigfig": 4,
+          "display": "",
+          "decimals": "",
+          "name": "AUC_all_log",
+          "format": "",
+          "label": "AUCall",
+          "type": "statistical"
+        }
+      ],
+      "description": "Individual & Summary PK Parameters Fasted",
+      "groups": [
+        "trta"
+      ],
+      "source": "pk-results-custom-calcs.csv",
+      "title": "Individual and Summary Parameters",
+      "type": "individual_summary_pk_parameters",
+      "replacementMapping": [],
+      "layout": {},
+      "stats": [],
+      "subtitle": "Fasted",
+      "styles": [],
+      "conditions": [
+        {
+          "column": "trta",
+          "value": "Fasted"
+        }
+      ],
+      "statsCompact": true
+    },
+    {
+      "fileName": "Conc-Fasted-Ind-Summary",
+      "columns": [
+        {
+          "sigfig": "",
+          "display": true,
+          "decimals": "",
+          "name": "subject",
+          "format": "",
+          "label": "Subject ID",
+          "type": "unique_id"
+        },
+        {
+          "pivotColumn": "time",
+          "sigfig": "",
+          "columns": [
+            {
+              "name": 0,
+              "label": "Pre-dose",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 0.5,
+              "label": "0.5 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 1,
+              "label": "1 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 1.5,
+              "label": "1.5 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 2,
+              "label": "2 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 4,
+              "label": "4 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 6,
+              "label": "6 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 8,
+              "label": "8 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 12,
+              "label": "12 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 16,
+              "label": "16 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 20,
+              "label": "20 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 24,
+              "label": "24 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            }
+          ],
+          "display": "",
+          "decimals": "",
+          "name": "",
+          "format": "",
+          "label": "",
+          "type": "pivot",
+          "pivotValueColumn": "PKLEVEL"
+        }
+      ],
+      "description": "Individual & Summary Concentrations Fasted",
+      "groups": [
+        "trta"
+      ],
+      "source": "Food-effect-data-v2.csv",
+      "title": "Concentration Table Fasted",
+      "type": "individual_summary_concentrations",
+      "replacementMapping": [],
+      "layout": {
+        "title": {
+          "display": true
+        },
+        "footer": {
+          "rows": [],
+          "display": true
+        }
+      },
+      "stats": [],
+      "subtitle": "Fasted Treatment",
+      "styles": [],
+      "conditions": [
+        {
+          "column": "trta",
+          "value": "Fasted"
+        }
+      ],
+      "statsCompact": false
+    },
+    {
+      "fileName": "Conc-Fed-Ind-Summary",
+      "columns": [
+        {
+          "sigfig": "",
+          "display": true,
+          "decimals": "",
+          "name": "subject",
+          "format": "",
+          "label": "Subject ID",
+          "type": "unique_id"
+        },
+        {
+          "pivotColumn": "time",
+          "sigfig": "",
+          "columns": [
+            {
+              "name": 0,
+              "label": "Pre-dose",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 0.5,
+              "label": "0.5 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 1,
+              "label": "1 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 1.5,
+              "label": "1.5 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 2,
+              "label": "2 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 4,
+              "label": "4 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 6,
+              "label": "6 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 8,
+              "label": "8 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 12,
+              "label": "12 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 16,
+              "label": "16 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 20,
+              "label": "20 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            },
+            {
+              "name": 24,
+              "label": "24 hr",
+              "type": "statistical",
+              "sigfig": 3,
+              "display": true
+            }
+          ],
+          "display": "",
+          "decimals": "",
+          "name": "",
+          "format": "",
+          "label": "",
+          "type": "pivot",
+          "pivotValueColumn": "PKLEVEL"
+        }
+      ],
+      "description": "Individual & Summary Concentrations Fed",
+      "groups": [
+        "trta"
+      ],
+      "source": "Food-effect-data-v2.csv",
+      "title": "Concentration Table Fed",
+      "type": "individual_summary_concentrations",
+      "replacementMapping": [],
+      "layout": {
+        "title": {
+          "display": true
+        },
+        "footer": {
+          "rows": [],
+          "display": true
+        }
+      },
+      "stats": [],
+      "subtitle": "Fed Treatment",
+      "styles": [],
+      "conditions": [
+        {
+          "column": "trta",
+          "value": "Fed"
+        }
+      ],
+      "statsCompact": false
+    }
+  ]
+}
