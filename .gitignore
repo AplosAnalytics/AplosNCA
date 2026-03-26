@@ -62,7 +62,6 @@ Temporary Items
 .aplos_creds
 *.RData
 *.Rhistory
-.Rbuildignore
 .Rproj.user
 .Renviron
 inst/doc/*
