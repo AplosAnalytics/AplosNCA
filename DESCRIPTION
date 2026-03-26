@@ -5,6 +5,8 @@ Authors@R:
     person("Nathan", "Teuscher", , "nathan@aplosanalytics.com", role = c("aut", "cre"))
 Description: Using this package you can interact with the Aplos NCA API using standard R functions. This will allow you to authenticate with your Aplos NCA account, upload input datasets, initiate analyses, and download results.
 License: MIT + file LICENSE
+URL: https://github.com/AplosAnalytics/AplosNCA
+BugReports: https://github.com/AplosAnalytics/AplosNCA/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
