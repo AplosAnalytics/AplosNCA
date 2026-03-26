@@ -1,6 +1,6 @@
 Package: AplosNCA
 Title: Use Aplos NCA API For Pharmacokinetic Analysis
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
     person("Nathan", "Teuscher", , "nathan@aplosanalytics.com", role = c("aut", "cre"))
 Description: Using this package you can interact with the Aplos NCA API using standard R functions. This will allow you to authenticate with your Aplos NCA account, upload input datasets, initiate analyses, and download results.
