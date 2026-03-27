@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}  # For remotes access
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Opt into Node 24 to suppress deprecation warning
     steps:
       - uses: actions/checkout@v4  # Updated to v4 (Node 24)
 
