@@ -58,12 +58,13 @@ aplos_download_results <- function(url, token, execution_id) {
 #'   download_info <- aplos_download_results(url, token, execution_id)
 #'   file_path <- aplos_fetch_results(download_info, unzip = TRUE)
 #' }
-aplos_fetch_results <- function(download_info, dest_dir = "results", unzip = FALSE) {
+aplos_fetch_results <- function(download_info, dest_dir = "", unzip = FALSE) {
   if (!is.data.frame(download_info) || !all(c("url", "filename") %in% names(download_info))) {
-    stop("download_info must be a data frame with 'url' and 'filename' columns.")
+    warning("download_info must be a data frame with 'url' and 'filename' columns.")
   }
 
   download_url <- download_info$url[1]  # Assuming single row; extend if multiple
+  if(dest_dir == "") dest_dir = tempdir()
   output_file <- file.path(dest_dir, download_info$filename[1])
 
   # Ensure dest_dir exists
@@ -75,13 +76,13 @@ aplos_fetch_results <- function(download_info, dest_dir = "results", unzip = FAL
   # Download the file using httr for reliability
   response <- httr::GET(download_url, httr::write_disk(output_file, overwrite = TRUE))
   if (httr::status_code(response) != 200) {
-    stop("Download failed with status code: ", httr::status_code(response))
+    warning("Download failed with status code: ", httr::status_code(response))
   }
-  cat("Results file downloaded to", output_file, "\n")
+  message("Results file downloaded to", output_file, "\n")
 
   # Check if the file was downloaded successfully
   if (!file.exists(output_file)) {
-    stop("Downloaded file not found at ", output_file)
+    warning("Downloaded file not found at ", output_file)
   }
 
   if (unzip) {
@@ -90,8 +91,8 @@ aplos_fetch_results <- function(download_info, dest_dir = "results", unzip = FAL
       dir.create(unzip_dir, recursive = TRUE)
     }
     unzip(output_file, exdir = unzip_dir)
-    cat("Results file unzipped.\n")
-    cat(paste0("Location is ", unzip_dir, "\n"))
+    message("Results file unzipped.\n")
+    message(paste0("Location is ", unzip_dir, "\n"))
     return(unzip_dir)
   } else {
     return(output_file)

@@ -4,7 +4,7 @@
 \alias{aplos_fetch_results}
 \title{Fetch and Optionally Unzip Aplos NCA Results}
 \usage{
-aplos_fetch_results(download_info, dest_dir = "results", unzip = FALSE)
+aplos_fetch_results(download_info, dest_dir = "", unzip = FALSE)
 }
 \arguments{
 \item{download_info}{A data frame from aplos_download_results() containing url and filename.}

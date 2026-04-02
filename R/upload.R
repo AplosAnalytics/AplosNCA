@@ -52,6 +52,7 @@ aplos_get_upload_url <- function(input_file, url, token) {
 #' @param input_file Path to the input file.
 #' @param result Result from aplos_get_upload_url().
 #' @param token JWT token.
+#' @return Invisible NULL. Uploads the file to the API as a side effect; throws an error if the upload fails.
 #' @export
 #' @examples
 #' \dontrun{

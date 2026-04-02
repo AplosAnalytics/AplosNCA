@@ -50,7 +50,7 @@ aplos_execute_analysis <- function(result, data_cleaning = "{}", analysis = "{}"
     '  "metadata": ',metadata, '\n',
     '}'
   )
-  if (save_body) { write(body_string, file = "body.txt") }
+  if (save_body) { write(body_string, file = paste0(tempdir(),"/body.txt")) }
 
   response <- tryCatch({
     httr::POST(url = paste0(url, "/v3/tenants/", tenant_id, "/users/", user_id, "/analysis/queue"),

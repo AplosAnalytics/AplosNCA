@@ -28,13 +28,13 @@ aplos_execution_status <- function(url, token, execution_id, sleep=10) {
     response <- tryCatch({
       httr::GET(paste0(url, "/v3/tenants/", tenant_id, "/users/", user_id, "/executions/", execution_id, "/status"),
                 httr::add_headers(.headers = headers))
-    }, error = function(e) stop("Status check failed: ", e$message))
+    }, error = function(e) warning("Status check failed: ", e$message))
 
     result <- jsonlite::fromJSON(httr::content(response, "text", encoding = "UTF-8"))
     if (result$data$status == "failed") { break }
     complete <- result$data$status == "succeeded"
     if (!complete) {
-      cat(paste0("Not yet complete ... ", result$data$status, " \n"))
+      message(paste0("Not yet complete ... ", result$data$status, " \n"))
       Sys.sleep(sleep)
     }
   }
@@ -43,6 +43,6 @@ aplos_execution_status <- function(url, token, execution_id, sleep=10) {
     cat("Execution complete. \n")
     return(result)
   } else {
-    stop(paste0("Execution failed. Execution ID = ", execution_id, "\n"))
+    warning(paste0("Execution failed. Execution ID = ", execution_id, "\n"))
   }
 }

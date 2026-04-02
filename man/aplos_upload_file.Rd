@@ -13,6 +13,9 @@ aplos_upload_file(input_file, result, token)
 
 \item{token}{JWT token.}
 }
+\value{
+Invisible NULL. Uploads the file to the API as a side effect; throws an error if the upload fails.
+}
 \description{
 Uploads a file using the presigned URL.
 }
