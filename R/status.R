@@ -40,7 +40,7 @@ aplos_execution_status <- function(url, token, execution_id, sleep=10) {
   }
 
   if (result$data$status == "succeeded") {
-    cat("Execution complete. \n")
+    message("Execution complete. \n")
     return(result)
   } else {
     warning(paste0("Execution failed. Execution ID = ", execution_id, "\n"))
