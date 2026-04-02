@@ -1,5 +1,5 @@
 Package: AplosNCA
-Title: Use 'Aplos NCA' API for Pharmacokinetic Analysis
+Title: Use 'Aplos NCA API' for Pharmacokinetic Analysis
 Version: 1.0.1
 Authors@R: 
     person("Nathan", "Teuscher", , "nathan@aplosanalytics.com", role = c("aut", "cre"))
