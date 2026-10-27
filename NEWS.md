@@ -21,3 +21,5 @@
 * Authentication state lives in a package-local registry (`R/auth-state.R`).
   The refresh window is configurable with
   `options(AplosNCA.refresh_window_seconds = ...)` for testing.
+* `options(AplosNCA.debug = TRUE)` reports when a refresh happens and which
+  mechanism was used (Cognito refresh token or token file re-read).

@@ -289,6 +289,12 @@
   }
 
   .aplos_session_update(session, refreshed$token, refreshed$refresh_token)
+
+  if (isTRUE(getOption("AplosNCA.debug"))) {
+    source <- if (!is.null(session$refresh_token)) "Cognito refresh token" else "token file re-read"
+    message("Aplos NCA token refreshed (", source, ").")
+  }
+
   refreshed$token
 }
 
