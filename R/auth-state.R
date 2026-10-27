@@ -203,7 +203,20 @@
   token
 }
 
-.aplos_read_token_file <- function(path, warn_perm = TRUE) {
+.aplos_strip_token_prefix <- function(value) {
+  value <- sub("^Bearer[[:space:]]+", "", value, ignore.case = TRUE)
+  value <- sub("^(JWT|ID_TOKEN|TOKEN|REFRESH_TOKEN)[[:space:]]*=[[:space:]]*", "",
+               value, ignore.case = TRUE)
+  gsub("^[\"']|[\"']$", "", value)
+}
+
+# Read a token file. Two layouts are supported:
+#
+#   * positional:  line 1 = ID token, optional line 2 = refresh token
+#   * key/value:   JWT=..., REFRESH_TOKEN=..., COGNITO_CLIENT_KEY=..., COGNITO_REGION=...
+#
+# Returns list(token, refresh_token, client_id, region); absent values are NULL.
+.aplos_read_token_config <- function(path, warn_perm = TRUE) {
   path <- normalizePath(path.expand(path), winslash = "/", mustWork = FALSE)
   if (!file.exists(path)) {
     stop("Token file not found: ", path, call. = FALSE)
@@ -226,11 +239,45 @@
     stop("Token file is empty: ", path, call. = FALSE)
   }
 
-  token <- lines[[1L]]
-  token <- sub("^Bearer[[:space:]]+", "", token, ignore.case = TRUE)
-  token <- sub("^JWT[[:space:]]*=[[:space:]]*", "", token, ignore.case = TRUE)
-  token <- gsub("^[\"']|[\"']$", "", token)
-  .aplos_validate_jwt(token)
+  config <- list(token = NULL, refresh_token = NULL, client_id = NULL, region = NULL)
+
+  if (any(grepl("^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=", lines))) {
+    key_map <- c(
+      JWT = "token", ID_TOKEN = "token", TOKEN = "token", APLOS_JWT = "token",
+      REFRESH_TOKEN = "refresh_token", COGNITO_REFRESH_TOKEN = "refresh_token",
+      COGNITO_CLIENT_KEY = "client_id", COGNITO_CLIENT_ID = "client_id",
+      CLIENT_ID = "client_id",
+      COGNITO_REGION = "region", REGION = "region", AWS_REGION = "region"
+    )
+    for (line in lines) {
+      key <- toupper(trimws(sub("[[:space:]]*=.*$", "", line)))
+      if (!key %in% names(key_map)) next
+      value <- trimws(sub("^[^=]*=", "", line))
+      value <- gsub("^[\"']|[\"']$", "", value)
+      field <- unname(key_map[[key]])
+      if (is.null(config[[field]]) && nzchar(value)) {
+        config[[field]] <- value
+      }
+    }
+  } else {
+    config$token <- .aplos_strip_token_prefix(lines[[1L]])
+    if (length(lines) >= 2L) {
+      config$refresh_token <- .aplos_strip_token_prefix(lines[[2L]])
+    }
+  }
+
+  if (is.null(config$token) || !nzchar(config$token)) {
+    stop("No JWT found in token file: ", path, call. = FALSE)
+  }
+  config$token <- .aplos_validate_jwt(config$token)
+  if (!is.null(config$refresh_token) && !nzchar(config$refresh_token)) {
+    config$refresh_token <- NULL
+  }
+  config
+}
+
+.aplos_read_token_file <- function(path, warn_perm = TRUE) {
+  .aplos_read_token_config(path, warn_perm = warn_perm)$token
 }
 
 # Return a token that is safe to use for the next API call, refreshing it when

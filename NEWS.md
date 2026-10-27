@@ -10,9 +10,12 @@
   analyses survive token expiry.
 * New `aplos_import_jwt()` reads a JWT from a hidden file (`~/.token` by
   default, or `APLOS_JWT_FILE`) for single sign-on (SSO) users, who cannot
-  authenticate with a username and password. Imported tokens are re-read when
-  they are close to expiry, so externally refreshed token files are picked up
-  automatically.
+  authenticate with a username and password.
+* The token file may also carry a Cognito refresh token (second line, or
+  `REFRESH_TOKEN=`), plus `COGNITO_CLIENT_KEY` and `COGNITO_REGION`, in which
+  case SSO tokens are renewed automatically like password logins. Without a
+  refresh token the file is simply re-read near expiry, so externally
+  refreshed token files are picked up automatically.
 * Documentation now states that tokens expire one hour after issue, replacing
   the previous "~15 minutes, extended by each API call" description.
 

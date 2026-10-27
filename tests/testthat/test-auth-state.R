@@ -357,3 +357,98 @@ test_that("refreshing an imported token does not repeat the permission warning",
   )
   expect_silent(AplosNCA:::.aplos_auth_context(token))
 })
+
+test_that("a refresh token in the file enables automatic renewal", {
+  AplosNCA:::.aplos_state_reset()
+  old_token <- "sso.old.token"
+  new_token <- "sso.new.token"
+  path <- local_tempfile(fileext = ".token")
+  writeLines(c(old_token, "sso.refresh.token"), path)
+
+  local_mocked_bindings(
+    decode_jwt = function(token, ...) {
+      if (identical(token, new_token)) {
+        mock_claims(as.numeric(Sys.time()) + 3600)
+      } else {
+        mock_claims(as.numeric(Sys.time()) + 600)
+      }
+    },
+    .package = "AzureAuth"
+  )
+  local_options(list(AplosNCA.refresh_window_seconds = 7200))
+
+  expect_message(
+    aplos_import_jwt(path, client_id = "client-1", region = "us-east-1"),
+    "refresh token available"
+  )
+
+  session <- AplosNCA:::.aplos_session_get(old_token)
+  expect_equal(session$refresh_token, "sso.refresh.token")
+  expect_equal(session$client_id, "client-1")
+  expect_equal(session$region, "us-east-1")
+
+  refresh_calls <- 0L
+  local_mocked_bindings(
+    POST = function(...) {
+      refresh_calls <<- refresh_calls + 1L
+      mock_response(200L, toJSON(list(
+        AuthenticationResult = list(
+          IdToken = new_token,
+          AccessToken = "access-token",
+          ExpiresIn = 3600,
+          TokenType = "Bearer"
+        )
+      ), auto_unbox = TRUE))
+    },
+    .package = "httr"
+  )
+
+  context <- AplosNCA:::.aplos_auth_context(old_token)
+  expect_equal(context$token, new_token)
+  expect_equal(refresh_calls, 1L)
+})
+
+test_that("key/value token files are parsed", {
+  AplosNCA:::.aplos_state_reset()
+  token <- "kv.id.token"
+  path <- local_tempfile(fileext = ".token")
+  writeLines(c(
+    'JWT="kv.id.token"',
+    'REFRESH_TOKEN="kv.refresh.token"',
+    'COGNITO_CLIENT_KEY="client-9"',
+    'COGNITO_REGION="us-west-2"'
+  ), path)
+
+  local_mocked_bindings(
+    decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
+    .package = "AzureAuth"
+  )
+
+  expect_message(aplos_import_jwt(path), "refresh token available")
+
+  session <- AplosNCA:::.aplos_session_get(token)
+  expect_equal(session$refresh_token, "kv.refresh.token")
+  expect_equal(session$client_id, "client-9")
+  expect_equal(session$region, "us-west-2")
+})
+
+test_that("a refresh token without client ID or region is ignored with a warning", {
+  AplosNCA:::.aplos_state_reset()
+  token <- "no.client.token"
+  path <- local_tempfile(fileext = ".token")
+  writeLines(c(token, "orphan.refresh.token"), path)
+
+  local_mocked_bindings(
+    decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
+    .package = "AzureAuth"
+  )
+  local_envvar(APLOS_COGNITO_CLIENT_ID = "", APLOS_COGNITO_REGION = "")
+
+  expect_warning(
+    expect_message(aplos_import_jwt(path), "no refresh token"),
+    "Add COGNITO_CLIENT_KEY"
+  )
+
+  session <- AplosNCA:::.aplos_session_get(token)
+  expect_null(session$refresh_token)
+})

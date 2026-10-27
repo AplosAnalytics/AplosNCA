@@ -46,10 +46,27 @@ result <- aplos_get_upload_url("data.csv",
                                "https://api.app.aplos-nca.com", token)
 ```
 
-When an imported token is within 20 minutes of expiring, the package re-reads
-the file before each API call, so a token refreshed by another tool is picked
-up automatically. Set the `APLOS_JWT_FILE` environment variable to use a
-different default path.
+If the file also contains a Cognito refresh token, the package renews the JWT
+automatically when less than 20 minutes remain — the same behaviour as a
+password login. Accepted layouts:
+
+```
+# Positional: line 1 = token, optional line 2 = refresh token
+eyJraWQiOi...
+eyJjdHkiOi...
+```
+
+```
+# Key/value
+JWT="eyJraWQiOi..."
+REFRESH_TOKEN="eyJjdHkiOi..."
+COGNITO_CLIENT_KEY="your_cognito_client_id"
+COGNITO_REGION="us-east-1"
+```
+
+Without a refresh token, the package re-reads the file before each API call, so
+a token refreshed by another tool is picked up automatically. Set the
+`APLOS_JWT_FILE` environment variable to use a different default path.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first.
