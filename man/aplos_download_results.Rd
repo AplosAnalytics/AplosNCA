@@ -9,7 +9,7 @@ aplos_download_results(url, token, execution_id)
 \arguments{
 \item{url}{The base API URL.}
 
-\item{token}{JWT token.}
+\item{token}{JWT token from aplos_get_jwt() or aplos_import_jwt(). Refreshed automatically when it is close to expiring.}
 
 \item{execution_id}{The execution ID.}
 }

@@ -2,7 +2,21 @@
 #' Obtain Aplos NCA API JWT Token
 #'
 #' @description
-#' Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT. The JWT is only valid for a period of time (~15 minutes). Each time you make an API call with a valid JWT, that token is refreshed and the valid period is extended. Thus during a normal analysis you will only need to authenticate once as you will be making API calls within the valid time window. However, if you walk away from your computer or there is a long delay between API calls you may need to authenticate again.
+#' Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT.
+#'
+#' The JWT expires one hour after it is issued. The package checks the token
+#' before every API call and, when less than 20 minutes remain, transparently
+#' refreshes it using the Cognito refresh token returned at login. This refresh
+#' happens inside the API functions, so a script can keep using the token
+#' object returned here without authenticating again.
+#'
+#' If the refresh token is rejected or unavailable, the API call stops with a
+#' message asking you to authenticate again; the package never retries with a
+#' stored password.
+#'
+#' Users who sign in through single sign-on (SSO) cannot use username/password
+#' authentication. Those users should obtain a JWT from the Aplos NCA web
+#' interface and use [aplos_import_jwt()] instead.
 #'
 #' Note: Store credentials securely; do not hardcode them in scripts. It is recommended that you use a hidden text file (e.g. ".aplos_creds") stored on your local computer. Read that file in and then parse it to update the required information for authentication. An example credential file may look like the following:
 #' APLOS_API_URL="https://api.app.aplos-nca.com"
@@ -17,6 +31,7 @@
 #' @param password Your Aplos NCA password.
 #' @param region The AWS region (e.g., "us-east-1").
 #' @return A character string containing the JWT token.
+#' @seealso [aplos_import_jwt()] for SSO users.
 #' @export
 #' @importFrom AzureAuth decode_jwt
 #' @examples
@@ -49,6 +64,93 @@ aplos_get_jwt <- function(client_id, username, password, region) {
   }
 
   result <- jsonlite::fromJSON(httr::content(response, "text", encoding = "UTF-8"))
-  jwt <- result$AuthenticationResult$IdToken
+  auth <- result$AuthenticationResult
+  jwt <- auth$IdToken
+  if (is.null(jwt) || !nzchar(jwt)) {
+    stop("JWT authentication failed: the response did not include an ID token.")
+  }
+
+  # Remember the refresh token so that near-expiry tokens can be renewed
+  # without asking for the password again.
+  .aplos_session_register(
+    jwt,
+    refresh_token = auth$RefreshToken,
+    client_id = client_id,
+    region = region
+  )
+
   return(jwt)
+}
+
+#' Import an Aplos NCA JWT Token from a File
+#'
+#' @description
+#' Reads a JWT from a hidden text file so that it can be used with the other
+#' Aplos NCA API functions. This is the authentication path for users who sign
+#' in through single sign-on (SSO), because SSO accounts cannot authenticate
+#' with a username and password through [aplos_get_jwt()].
+#'
+#' Obtain the token from the Aplos NCA web interface and save it on a single
+#' line in a file in your home directory, for example `~/.token`. A leading
+#' `Bearer ` prefix is allowed. Restrict the file so that only you can read it
+#' (`chmod 600 ~/.token` on macOS and Linux). The token is never printed by the
+#' package and is not written anywhere else.
+#'
+#' Tokens expire one hour after they are issued. When an imported token has
+#' less than 20 minutes remaining, the package re-reads the file before each
+#' API call, so a token refreshed by another tool is picked up automatically.
+#' If the file still contains an expired token, the API call stops with a
+#' message asking you to update the file.
+#'
+#' @param path Path to the file containing the JWT. Defaults to the value of
+#'   the `APLOS_JWT_FILE` environment variable when set, otherwise `~/.token`.
+#' @return The JWT token, invisibly.
+#' @seealso [aplos_get_jwt()] for username/password authentication.
+#' @export
+#' @examples
+#' \dontrun{
+#'   # SSO users: save the token from the web interface to ~/.token first.
+#'   token <- aplos_import_jwt()
+#'
+#'   result <- aplos_get_upload_url("data.csv",
+#'                                  "https://api.app.aplos-nca.com", token)
+#' }
+aplos_import_jwt <- function(path = NULL) {
+  if (is.null(path) || !nzchar(path)) {
+    path <- Sys.getenv("APLOS_JWT_FILE", "")
+    if (!nzchar(path)) {
+      path <- "~/.token"
+    }
+  }
+  path <- path.expand(path)
+
+  token <- .aplos_read_token_file(path)
+  claims <- .aplos_token_claims(token)
+
+  if (is.null(claims$tenant_id) || is.null(claims$user_id)) {
+    warning("The imported token is missing the Aplos NCA tenant or user claim. ",
+            "API calls may fail; check that the whole token was copied.",
+            call. = FALSE)
+  }
+
+  if (!is.null(claims$exp) && claims$exp <= .aplos_now()) {
+    stop("The token in '", path, "' expired at ",
+         format(as.POSIXct(claims$exp, origin = "1970-01-01", tz = "UTC"),
+                "%Y-%m-%d %H:%M:%S UTC"),
+         ". Download a new token and replace the file contents.",
+         call. = FALSE)
+  }
+
+  .aplos_session_register(token, token_file = path)
+
+  expiry_text <- if (is.null(claims$exp)) {
+    "expiry unknown"
+  } else {
+    paste0("expires ",
+           format(as.POSIXct(claims$exp, origin = "1970-01-01", tz = "UTC"),
+                  "%Y-%m-%d %H:%M:%S UTC"))
+  }
+  message("Imported Aplos NCA token from ", path, " (", expiry_text, ").")
+
+  invisible(token)
 }

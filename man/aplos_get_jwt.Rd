@@ -19,7 +19,21 @@ aplos_get_jwt(client_id, username, password, region)
 A character string containing the JWT token.
 }
 \description{
-Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT. The JWT is only valid for a period of time (~15 minutes). Each time you make an API call with a valid JWT, that token is refreshed and the valid period is extended. Thus during a normal analysis you will only need to authenticate once as you will be making API calls within the valid time window. However, if you walk away from your computer or there is a long delay between API calls you may need to authenticate again.
+Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT.
+
+The JWT expires one hour after it is issued. The package checks the token
+before every API call and, when less than 20 minutes remain, transparently
+refreshes it using the Cognito refresh token returned at login. This refresh
+happens inside the API functions, so a script can keep using the token
+object returned here without authenticating again.
+
+If the refresh token is rejected or unavailable, the API call stops with a
+message asking you to authenticate again; the package never retries with a
+stored password.
+
+Users who sign in through single sign-on (SSO) cannot use username/password
+authentication. Those users should obtain a JWT from the Aplos NCA web
+interface and use \code{\link[=aplos_import_jwt]{aplos_import_jwt()}} instead.
 
 Note: Store credentials securely; do not hardcode them in scripts. It is recommended that you use a hidden text file (e.g. ".aplos_creds") stored on your local computer. Read that file in and then parse it to update the required information for authentication. An example credential file may look like the following:
 APLOS_API_URL="https://api.app.aplos-nca.com"
@@ -28,6 +42,9 @@ COGNITO_USER_NAME="your_username"
 COGNITO_PASSWORD="your_password"
 COGNITO_REGION="your_aws_region"
 All of this information can be found in your user profile for your Aplos NCA account under "API Settings".
+}
+\seealso{
+\code{\link[=aplos_import_jwt]{aplos_import_jwt()}} for SSO users.
 }
 \examples{
 \dontrun{

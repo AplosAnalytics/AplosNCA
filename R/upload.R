@@ -5,7 +5,8 @@
 #'
 #' @param input_file Path to the input file.
 #' @param url The base API URL.
-#' @param token JWT token from aplos_get_jwt().
+#' @param token JWT token from aplos_get_jwt() or aplos_import_jwt().
+#'   Refreshed automatically when it is close to expiring.
 #' @return A list with upload details.
 #' @export
 #' @importFrom stringr str_split_i
@@ -19,12 +20,12 @@ aplos_get_upload_url <- function(input_file, url, token) {
     stop("All parameters (input_file, url, token) are required.")
   }
 
-  tenant_id <- AzureAuth::decode_jwt(token)$payload$`custom:aplos_user_tenant_id`
-  user_id <- AzureAuth::decode_jwt(token)$payload$`custom:aplos_user_id`
+  context <- .aplos_auth_context(token)
+  tenant_id <- context$tenant_id
+  user_id <- context$user_id
   filename <- stringr::str_split_i(input_file, "/", -1)
   upload_url <- paste0(url, "/v3/tenants/", tenant_id, "/users/", user_id, "/files")
-  headers <- c("Content-Type" = "application/json",
-               "Authorization" = paste0("Bearer ", token))
+  headers <- context$headers
   body <- list(
     "file_name" = filename,
     method_type = "post",
