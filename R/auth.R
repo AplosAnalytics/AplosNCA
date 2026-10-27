@@ -190,8 +190,8 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
   if (is.null(region) || !nzchar(region)) {
     region <- Sys.getenv("APLOS_COGNITO_REGION", "")
   }
-  if (!nzchar(client_id)) client_id <- NULL
-  if (!nzchar(region)) region <- NULL
+  if (!is.null(client_id) && !nzchar(client_id)) client_id <- NULL
+  if (!is.null(region) && !nzchar(region)) region <- NULL
 
   refresh_token <- config$refresh_token
   if (!is.null(refresh_token) && (is.null(client_id) || is.null(region))) {
