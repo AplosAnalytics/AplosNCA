@@ -43,12 +43,12 @@ COGNITO_PASSWORD="your_password"
 COGNITO_REGION="your_aws_region"
 All of this information can be found in your user profile for your Aplos NCA account under "API Settings".
 }
-\seealso{
-\code{\link[=aplos_import_jwt]{aplos_import_jwt()}} for SSO users.
-}
 \examples{
 \dontrun{
   token <- aplos_get_jwt(client_id = "your_client_id", username = "user",
                          password = "pass", region = "us-east-1")
 }
+}
+\seealso{
+\code{\link[=aplos_import_jwt]{aplos_import_jwt()}} for SSO users.
 }

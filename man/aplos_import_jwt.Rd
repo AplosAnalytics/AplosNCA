@@ -8,7 +8,7 @@ aplos_import_jwt(path = NULL)
 }
 \arguments{
 \item{path}{Path to the file containing the JWT. Defaults to the value of
-the \code{APLOS_JWT_FILE} environment variable when set, otherwise \code{~/.token}.}
+the \code{APLOS_JWT_FILE} environment variable when set, otherwise \verb{~/.token}.}
 }
 \value{
 The JWT token, invisibly.
@@ -20,8 +20,8 @@ in through single sign-on (SSO), because SSO accounts cannot authenticate
 with a username and password through \code{\link[=aplos_get_jwt]{aplos_get_jwt()}}.
 
 Obtain the token from the Aplos NCA web interface and save it on a single
-line in a file in your home directory, for example \code{~/.token}. A leading
-\verb{Bearer } prefix is allowed. Restrict the file so that only you can read it
+line in a file in your home directory, for example \verb{~/.token}. A leading
+\code{Bearer } prefix is allowed. Restrict the file so that only you can read it
 (\verb{chmod 600 ~/.token} on macOS and Linux). The token is never printed by the
 package and is not written anywhere else.
 
