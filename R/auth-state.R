@@ -203,15 +203,15 @@
   token
 }
 
-.aplos_read_token_file <- function(path) {
-  path <- path.expand(path)
+.aplos_read_token_file <- function(path, warn_perm = TRUE) {
+  path <- normalizePath(path.expand(path), winslash = "/", mustWork = FALSE)
   if (!file.exists(path)) {
     stop("Token file not found: ", path, call. = FALSE)
   }
   if (file.access(path, 4L) != 0L) {
     stop("Token file is not readable: ", path, call. = FALSE)
   }
-  if (.Platform$OS.type != "windows") {
+  if (warn_perm && .Platform$OS.type != "windows") {
     mode <- file.info(path)$mode
     if (!is.na(mode) && bitwAnd(as.integer(mode), 63L) != 0L) {
       warning("Token file '", path,
@@ -259,7 +259,9 @@
                           })
   } else if (!is.null(session$token_file)) {
     refreshed <- tryCatch({
-      new_token <- .aplos_read_token_file(session$token_file)
+      # Permissions were already checked when the file was imported; do not
+      # warn again on every refreshed call.
+      new_token <- .aplos_read_token_file(session$token_file, warn_perm = FALSE)
       if (identical(new_token, session$token) && remaining <= 0) {
         failure <<- "the file still contains the expired token"
         NULL

@@ -318,3 +318,42 @@ test_that("token files readable by other users produce a warning", {
 
   expect_warning(aplos_import_jwt(path), "readable by other users")
 })
+
+test_that("imported token file paths are stored as absolute paths", {
+  AplosNCA:::.aplos_state_reset()
+  token <- "relative.path.token"
+  path <- local_tempfile(fileext = ".token")
+  writeLines(token, path)
+
+  local_mocked_bindings(
+    decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
+    .package = "AzureAuth"
+  )
+
+  local_dir(dirname(path))
+  expect_message(aplos_import_jwt(basename(path)), "Imported Aplos NCA token")
+
+  session <- AplosNCA:::.aplos_session_get(token)
+  expect_equal(session$token_file, normalizePath(path, winslash = "/"))
+})
+
+test_that("refreshing an imported token does not repeat the permission warning", {
+  skip_on_os("windows")
+  AplosNCA:::.aplos_state_reset()
+  token <- "perm.warning.token"
+  path <- local_tempfile(fileext = ".token")
+  writeLines(token, path)
+  Sys.chmod(path, mode = "0644")
+
+  local_mocked_bindings(
+    decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
+    .package = "AzureAuth"
+  )
+  local_options(list(AplosNCA.refresh_window_seconds = 7200))
+
+  expect_warning(
+    expect_message(aplos_import_jwt(path), "Imported Aplos NCA token"),
+    "chmod 600"
+  )
+  expect_silent(AplosNCA:::.aplos_auth_context(token))
+})

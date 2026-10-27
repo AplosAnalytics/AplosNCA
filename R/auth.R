@@ -122,7 +122,7 @@ aplos_import_jwt <- function(path = NULL) {
       path <- "~/.token"
     }
   }
-  path <- path.expand(path)
+  path <- normalizePath(path.expand(path), winslash = "/", mustWork = FALSE)
 
   token <- .aplos_read_token_file(path)
   claims <- .aplos_token_claims(token)
