@@ -139,7 +139,7 @@
                    error = function(e) "")
   message_text <- tryCatch({
     parsed <- jsonlite::fromJSON(body)
-    parsed$message %||% parsed$__type %||% body
+    parsed[["message"]] %||% parsed[["__type"]] %||% body
   }, error = function(e) body)
   if (is.null(message_text) || !nzchar(message_text)) {
     message_text <- paste0("HTTP ", httr::status_code(response))
