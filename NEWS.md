@@ -8,6 +8,9 @@
   using the same token object; no re-authentication is required.
 * `aplos_execution_status()` re-checks the token on every poll, so long-running
   analyses survive token expiry.
+* `aplos_get_jwt()` now captures the Cognito refresh token that comes back with
+  the JWT. `return_refresh = TRUE` returns both, for callers that want to
+  persist the refresh token (for example in a token file).
 * New `aplos_import_jwt()` reads a JWT from a hidden file (`~/.token` by
   default, or `APLOS_JWT_FILE`) for single sign-on (SSO) users, who cannot
   authenticate with a username and password.

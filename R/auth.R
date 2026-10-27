@@ -30,7 +30,11 @@
 #' @param username Your Aplos NCA username.
 #' @param password Your Aplos NCA password.
 #' @param region The AWS region (e.g., "us-east-1").
-#' @return A character string containing the JWT token.
+#' @param return_refresh Logical; if `TRUE`, return a list with the JWT and the
+#'   Cognito refresh token instead of just the JWT (default `FALSE`). The
+#'   refresh token is captured either way and used for automatic renewal.
+#' @return A character string containing the JWT token, or, when
+#'   `return_refresh = TRUE`, a list with elements `token` and `refresh_token`.
 #' @seealso [aplos_import_jwt()] for SSO users.
 #' @export
 #' @importFrom AzureAuth decode_jwt
@@ -39,7 +43,8 @@
 #'   token <- aplos_get_jwt(client_id = "your_client_id", username = "user",
 #'                          password = "pass", region = "us-east-1")
 #' }
-aplos_get_jwt <- function(client_id, username, password, region) {
+aplos_get_jwt <- function(client_id, username, password, region,
+                          return_refresh = FALSE) {
   if (missing(client_id) || missing(username) || missing(password) || missing(region)) {
     stop("All parameters (client_id, username, password, region) are required.")
   }
@@ -78,6 +83,10 @@ aplos_get_jwt <- function(client_id, username, password, region) {
     client_id = client_id,
     region = region
   )
+
+  if (isTRUE(return_refresh)) {
+    return(list(token = jwt, refresh_token = auth$RefreshToken %||% NULL))
+  }
 
   return(jwt)
 }

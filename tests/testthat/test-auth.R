@@ -32,3 +32,38 @@ test_that("aplos_get_jwt authenticates successfully with mock", {
 test_that("aplos_get_jwt errors on missing params", {
   expect_error(aplos_get_jwt(client_id = "id", username = "user", password = "pass"), "All parameters.*required")
 })
+
+test_that("aplos_get_jwt can return the refresh token with the JWT", {
+  body <- jsonlite::toJSON(list(
+    AuthenticationResult = list(
+      IdToken = "fake_id_token",
+      RefreshToken = "***",
+      AccessToken = "access_token",
+      ExpiresIn = 3600,
+      TokenType = "Bearer"
+    )
+  ), auto_unbox = TRUE)
+  mock_response <- structure(
+    list(
+      url = "https://cognito-idp.us-east-1.amazonaws.com/",
+      status_code = 200L,
+      headers = structure(list(), class = c("insensitive", "list")),
+      content = charToRaw(body),
+      date = structure(0, class = c("POSIXct", "POSIXt"), tzone = "GMT"),
+      times = c(redirect = 0, namelookup = 0, connect = 0, pretransfer = 0,
+                starttransfer = 0, total = 0)
+    ),
+    class = "response"
+  )
+
+  local_mocked_bindings(
+    POST = function(...) mock_response,
+    .package = "httr"
+  )
+
+  result <- aplos_get_jwt("client-1", "user", "pass", "us-east-1",
+                          return_refresh = TRUE)
+  expect_type(result, "list")
+  expect_equal(result$token, "fake_id_token")
+  expect_equal(result$refresh_token, "fake_refresh_token")
+})

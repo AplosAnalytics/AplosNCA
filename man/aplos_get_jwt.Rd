@@ -4,7 +4,7 @@
 \alias{aplos_get_jwt}
 \title{Obtain Aplos NCA API JWT Token}
 \usage{
-aplos_get_jwt(client_id, username, password, region)
+aplos_get_jwt(client_id, username, password, region, return_refresh = FALSE)
 }
 \arguments{
 \item{client_id}{The Cognito client ID.}
@@ -14,9 +14,14 @@ aplos_get_jwt(client_id, username, password, region)
 \item{password}{Your Aplos NCA password.}
 
 \item{region}{The AWS region (e.g., "us-east-1").}
+
+\item{return_refresh}{Logical; if \code{TRUE}, return a list with the JWT and the
+Cognito refresh token instead of just the JWT (default \code{FALSE}). The
+refresh token is captured either way and used for automatic renewal.}
 }
 \value{
-A character string containing the JWT token.
+A character string containing the JWT token, or, when
+\code{return_refresh = TRUE}, a list with elements \code{token} and \code{refresh_token}.
 }
 \description{
 Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT.
