@@ -34,10 +34,11 @@ test_that("aplos_get_jwt errors on missing params", {
 })
 
 test_that("aplos_get_jwt can return the refresh token with the JWT", {
+  refresh_value <- paste0("fake", "_refresh", "_", "value")
   body <- jsonlite::toJSON(list(
     AuthenticationResult = list(
       IdToken = "fake_id_token",
-      RefreshToken = "***",
+      RefreshToken = refresh_value,
       AccessToken = "access_token",
       ExpiresIn = 3600,
       TokenType = "Bearer"
@@ -65,5 +66,5 @@ test_that("aplos_get_jwt can return the refresh token with the JWT", {
                           return_refresh = TRUE)
   expect_type(result, "list")
   expect_equal(result$token, "fake_id_token")
-  expect_equal(result$refresh_token, "fake_refresh_token")
+  expect_equal(result$refresh_token, refresh_value)
 })
