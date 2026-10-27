@@ -34,5 +34,19 @@ jobs:
         shell: Rscript {0}
 
       - name: Check
+        id: check
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
+
+      - name: Report check errors
+        if: failure()
+        run: |
+          LOG=$(ls *.Rcheck/00check.log 2>/dev/null | head -1)
+          if [ -z "$LOG" ]; then
+            echo "::error title=R CMD check::package check log not found"
+            exit 0
+          fi
+          echo "----- 00check.log (tail) -----"
+          tail -n 120 "$LOG"
+          MSG=$(grep -m1 -B2 -A25 -E "ERROR|Error" "$LOG" | tr '\n' '|' | sed 's/%/%25/g' | cut -c1-900)
+          echo "::error title=R CMD check error::${MSG}"
