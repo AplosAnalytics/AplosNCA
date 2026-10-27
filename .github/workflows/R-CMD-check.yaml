@@ -35,13 +35,13 @@ jobs:
 
       - name: Check
         id: check
-        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
+        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error", check_dir = "check")
         shell: Rscript {0}
 
       - name: Report check errors
         if: failure()
         run: |
-          LOG=$(ls *.Rcheck/00check.log 2>/dev/null | head -1)
+          LOG=$(find . -name 00check.log 2>/dev/null | head -1)
           if [ -z "$LOG" ]; then
             echo "::error title=R CMD check::package check log not found"
             exit 0
