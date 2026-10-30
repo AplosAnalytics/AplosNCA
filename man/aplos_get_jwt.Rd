@@ -37,8 +37,13 @@ message asking you to authenticate again; the package never retries with a
 stored password.
 
 Users who sign in through single sign-on (SSO) cannot use username/password
-authentication. Those users should obtain a JWT from the Aplos NCA web
-interface and use \code{\link[=aplos_import_jwt]{aplos_import_jwt()}} instead.
+authentication. Those users should copy an Aplos NCA Refresh Token from
+their profile page (API Settings) in the Aplos NCA web application and use
+\code{\link[=aplos_import_jwt]{aplos_import_jwt()}} instead.
+
+The API URL is not involved in authentication: Cognito is addressed with the
+client ID and AWS region. The URL identifies the Aplos NCA API and is passed
+to the analysis functions.
 
 Note: Store credentials securely; do not hardcode them in scripts. It is recommended that you use a hidden text file (e.g. ".aplos_creds") stored on your local computer. Read that file in and then parse it to update the required information for authentication. An example credential file may look like the following:
 APLOS_API_URL="https://api.app.aplos-nca.com"

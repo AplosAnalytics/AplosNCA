@@ -15,8 +15,13 @@
 #' stored password.
 #'
 #' Users who sign in through single sign-on (SSO) cannot use username/password
-#' authentication. Those users should obtain a JWT from the Aplos NCA web
-#' interface and use [aplos_import_jwt()] instead.
+#' authentication. Those users should copy an Aplos NCA Refresh Token from
+#' their profile page (API Settings) in the Aplos NCA web application and use
+#' [aplos_import_jwt()] instead.
+#'
+#' The API URL is not involved in authentication: Cognito is addressed with the
+#' client ID and AWS region. The URL identifies the Aplos NCA API and is passed
+#' to the analysis functions.
 #'
 #' Note: Store credentials securely; do not hardcode them in scripts. It is recommended that you use a hidden text file (e.g. ".aplos_creds") stored on your local computer. Read that file in and then parse it to update the required information for authentication. An example credential file may look like the following:
 #' APLOS_API_URL="https://api.app.aplos-nca.com"
@@ -100,10 +105,12 @@ aplos_get_jwt <- function(client_id, username, password, region,
 #' (SSO), because SSO accounts cannot authenticate with a username and password
 #' through [aplos_get_jwt()].
 #'
-#' SSO users only need the Aplos NCA Refresh Token from the Aplos NCA web interface,
-#' together with the Cognito client ID and region shown in API Settings. The
-#' package obtains the JWT itself and renews it automatically, so the file does
-#' not have to be refreshed every hour.
+#' SSO users only need the Aplos NCA Refresh Token, copied from their profile
+#' page (API Settings) in the Aplos NCA web application, together with the
+#' Cognito client ID and region shown on the same page. The package obtains the
+#' Aplos NCA JWT itself and renews it automatically, so the file does not have
+#' to be refreshed every hour. The API URL is not involved in authentication;
+#' it is passed to the analysis functions.
 #'
 #' Aplos NCA Refresh Tokens have their own lifetime, set on the Cognito app client (30
 #' days by default), and using one does not extend it. When it expires or is

@@ -26,10 +26,12 @@ is the authentication path for users who sign in through single sign-on
 (SSO), because SSO accounts cannot authenticate with a username and password
 through \code{\link[=aplos_get_jwt]{aplos_get_jwt()}}.
 
-SSO users only need the Aplos NCA Refresh Token from the Aplos NCA web interface,
-together with the Cognito client ID and region shown in API Settings. The
-package obtains the JWT itself and renews it automatically, so the file does
-not have to be refreshed every hour.
+SSO users only need the Aplos NCA Refresh Token, copied from their profile
+page (API Settings) in the Aplos NCA web application, together with the
+Cognito client ID and region shown on the same page. The package obtains the
+Aplos NCA JWT itself and renews it automatically, so the file does not have
+to be refreshed every hour. The API URL is not involved in authentication;
+it is passed to the analysis functions.
 
 Refresh tokens have their own lifetime, set on the Cognito app client (30
 days by default), and using one does not extend it. When it expires or is

@@ -11,12 +11,15 @@ R package to use Aplos NCA API calls. This package includes functions that do th
 
 ## Authentication
 
-Aplos NCA API calls require an Aplos NCA JWT. JWTs expire one hour after they are issued.
-The package checks the Aplos NCA JWT before every API call and refreshes it
-automatically when less than 20 minutes remain (using the Aplos NCA Refresh Token
-from login), so you authenticate once per session in normal use.
+Every API call needs an Aplos NCA JWT. A JWT expires one hour after it is
+issued; the package renews it automatically with an Aplos NCA Refresh Token
+when less than 20 minutes remain, so you authenticate once and keep working.
 
-### Username and password
+There are two ways to obtain the pair.
+
+### 1. Username and password
+
+Supply the Cognito client ID, your username, password, and AWS region:
 
 ```r
 token <- aplos_get_jwt(client_id = "your_client_id",
@@ -25,26 +28,16 @@ token <- aplos_get_jwt(client_id = "your_client_id",
                        region = "us-east-1")
 ```
 
-Store credentials in a local file such as `~/.aplos_creds`; do not hardcode
-them in scripts. See `?aplos_get_jwt` for the file format.
+Cognito returns an Aplos NCA JWT and an Aplos NCA Refresh Token at the same
+time. The package keeps both and uses the refresh token to renew the JWT for
+the rest of the R session. `return_refresh = TRUE` returns both if you want to
+store the refresh token yourself.
 
-### Single sign-on (SSO)
+### 2. Aplos NCA Refresh Token
 
-SSO accounts cannot authenticate with a username and password. You only need the
-**Aplos NCA Refresh Token** from the Aplos NCA web interface, plus the Cognito client ID
-and region shown in API Settings. The package exchanges the Aplos NCA Refresh Token for an
-Aplos NCA JWT and renews it automatically.
-
-Aplos NCA Refresh Tokens have their own lifetime, configured on the Cognito app client
-(30 days by default). Using one does not extend it. When it expires or is
-revoked, `aplos_import_jwt()` fails with `Cognito rejected the Aplos NCA Refresh Token`
-and you import a new one.
-
-Save the three values in a hidden file:
-
-```bash
-chmod 600 ~/.token
-```
+If you sign in through single sign-on (SSO), or you already hold a refresh
+token, copy the Aplos NCA Refresh Token from your profile page (API Settings)
+in the Aplos NCA web application. Save it with the client ID and region:
 
 ```
 REFRESH_TOKEN="your_refresh_token"
@@ -53,20 +46,29 @@ COGNITO_REGION="us-east-1"
 ```
 
 ```r
-token <- aplos_import_jwt()          # reads ~/.token, returns an Aplos NCA JWT
-# or: token <- aplos_import_jwt("~/path/to/token")
-
-result <- aplos_get_upload_url("data.csv",
-                               "https://api.app.aplos-nca.com", token)
+token <- aplos_import_jwt("~/.token")
 ```
 
-A file with only the Aplos NCA Refresh Token also works when `client_id` and `region` are
-passed as arguments, or set as `APLOS_COGNITO_CLIENT_ID` /
-`APLOS_COGNITO_REGION`. A file containing a bare Aplos NCA JWT is still accepted for
-backwards compatibility, but such a JWT cannot be renewed: it works until it
-expires, then the package stops and asks for an Aplos NCA Refresh Token.
+The package exchanges it for an Aplos NCA JWT and renews that JWT the same way.
+The refresh token can be reused in later sessions until it expires or is
+revoked, so one file is enough.
 
-Set `APLOS_JWT_FILE` to use a different default path.
+### The API URL
+
+The URL (for example `https://api.app.aplos-nca.com`) is not used to obtain
+either token — Cognito is addressed with the client ID and AWS region. The URL
+identifies the Aplos NCA API and is passed to the analysis functions:
+
+```r
+result <- aplos_get_upload_url("data.csv", "https://api.app.aplos-nca.com", token)
+```
+
+### Lifetimes
+
+- **Aplos NCA JWT**: one hour. Renewed automatically when 20 minutes remain.
+- **Aplos NCA Refresh Token**: set on the Cognito app client, 30 days by
+  default. Using it does not extend it. When it expires or is revoked, renewal
+  fails and you import a new one.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first.
