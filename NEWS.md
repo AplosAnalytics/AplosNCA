@@ -11,14 +11,12 @@
 * `aplos_get_jwt()` now captures the Cognito refresh token that comes back with
   the JWT. `return_refresh = TRUE` returns both, for callers that want to
   persist the refresh token (for example in a token file).
-* New `aplos_import_jwt()` reads a JWT from a hidden file (`~/.token` by
-  default, or `APLOS_JWT_FILE`) for single sign-on (SSO) users, who cannot
-  authenticate with a username and password.
-* The token file may also carry a Cognito refresh token (second line, or
-  `REFRESH_TOKEN=`), plus `COGNITO_CLIENT_KEY` and `COGNITO_REGION`, in which
-  case SSO tokens are renewed automatically like password logins. Without a
-  refresh token the file is simply re-read near expiry, so externally
-  refreshed token files are picked up automatically.
+* New `aplos_import_jwt()` authenticates single sign-on (SSO) users from a
+  refresh token rather than a JWT. The file holds `REFRESH_TOKEN`,
+  `COGNITO_CLIENT_KEY` and `COGNITO_REGION`; the package exchanges the refresh
+  token for a JWT at import and renews it automatically, exactly like a
+  password login. A bare JWT file is still accepted for backwards
+  compatibility, but it cannot be renewed.
 * Documentation now states that tokens expire one hour after issue, replacing
   the previous "~15 minutes, extended by each API call" description.
 

@@ -91,62 +91,51 @@ aplos_get_jwt <- function(client_id, username, password, region,
   return(jwt)
 }
 
-#' Import an Aplos NCA JWT Token from a File
+#' Import Aplos NCA Credentials from a File
 #'
 #' @description
-#' Reads a JWT from a hidden text file so that it can be used with the other
-#' Aplos NCA API functions. This is the authentication path for users who sign
-#' in through single sign-on (SSO), because SSO accounts cannot authenticate
-#' with a username and password through [aplos_get_jwt()].
+#' Reads a Cognito refresh token from a hidden text file, exchanges it for a
+#' JWT, and registers both for use with the other Aplos NCA API functions. This
+#' is the authentication path for users who sign in through single sign-on
+#' (SSO), because SSO accounts cannot authenticate with a username and password
+#' through [aplos_get_jwt()].
 #'
-#' Obtain the token from the Aplos NCA web interface and save it on a single
-#' line in a file in your home directory, for example `~/.token`. A leading
-#' `Bearer ` prefix is allowed. Restrict the file so that only you can read it
-#' (`chmod 600 ~/.token` on macOS and Linux). The token is never printed by the
-#' package and is not written anywhere else.
+#' SSO users only need the refresh token from the Aplos NCA web interface,
+#' together with the Cognito client ID and region shown in API Settings. The
+#' package obtains the JWT itself and renews it automatically, so the file does
+#' not have to be refreshed every hour.
 #'
-#' The file may hold just the JWT, or the JWT plus a Cognito refresh token so
-#' that the package can renew it automatically. Two layouts are accepted:
+#' Save the values in a hidden file in your home directory, for example
+#' `~/.token`, and restrict it (`chmod 600 ~/.token` on macOS and Linux):
 #'
 #' \preformatted{
-#' # Positional: line 1 = token, optional line 2 = refresh token
-#' eyJraWQiOi...
-#' eyJjdHkiOi...
-#'
-#' # Key/value
-#' JWT="eyJraWQiOi..."
-#' REFRESH_TOKEN="eyJjdHkiOi..."
-#' COGNITO_CLIENT_KEY="your_cognito_client_id"
+#' REFRESH_TOKEN="..."
+#' COGNITO_CLIENT_KEY="..."
 #' COGNITO_REGION="us-east-1"
 #' }
 #'
-#' Tokens expire one hour after they are issued. When the file includes a
-#' refresh token (and a client ID and region), the package exchanges it for a
-#' new JWT when less than 20 minutes remain, exactly as it does for
-#' [aplos_get_jwt()]. Without a refresh token, it re-reads the file before each
-#' API call so a token refreshed by another tool is picked up automatically; if
-#' the file still contains an expired token, the call stops with a message
-#' asking you to update it.
+#' A single line containing only the refresh token is also accepted when
+#' `client_id` and `region` are supplied as arguments or environment variables
+#' (`APLOS_COGNITO_CLIENT_ID`, `APLOS_COGNITO_REGION`).
 #'
-#' @param path Path to the file containing the JWT. Defaults to the value of
-#'   the `APLOS_JWT_FILE` environment variable when set, otherwise `~/.token`.
-#' @param client_id Optional Cognito client ID used to refresh the token.
-#'   Defaults to the `COGNITO_CLIENT_KEY` value in the file, then the
-#'   `APLOS_COGNITO_CLIENT_ID` environment variable.
-#' @param region Optional AWS region used to refresh the token. Defaults to the
-#'   `COGNITO_REGION` value in the file, then the `APLOS_COGNITO_REGION`
-#'   environment variable.
+#' A file containing a JWT instead of a refresh token is still accepted for
+#' backwards compatibility, but such a token cannot be renewed by the package:
+#' it is used until it expires, then the call stops with a message asking for a
+#' refresh token.
+#'
+#' @param path Path to the file. Defaults to the `APLOS_JWT_FILE` environment
+#'   variable when set, otherwise `~/.token`.
+#' @param client_id Cognito client ID that issued the refresh token. Defaults to
+#'   `COGNITO_CLIENT_KEY` in the file, then `APLOS_COGNITO_CLIENT_ID`.
+#' @param region AWS region of the user pool. Defaults to `COGNITO_REGION` in
+#'   the file, then `APLOS_COGNITO_REGION`.
 #' @return The JWT token, invisibly.
 #' @seealso [aplos_get_jwt()] for username/password authentication.
 #' @export
 #' @examples
 #' \dontrun{
-#'   # SSO users: save the token from the web interface to ~/.token first.
+#'   # SSO users: save the refresh token and client settings to ~/.token first.
 #'   token <- aplos_import_jwt()
-#'
-#'   # With a refresh token in the file or supplied here:
-#'   token <- aplos_import_jwt("~/.token", client_id = "your_client_id",
-#'                             region = "us-east-1")
 #'
 #'   result <- aplos_get_upload_url("data.csv",
 #'                                  "https://api.app.aplos-nca.com", token)
@@ -161,45 +150,76 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
   path <- normalizePath(path.expand(path), winslash = "/", mustWork = FALSE)
 
   config <- .aplos_read_token_config(path)
-  token <- config$token
-  claims <- .aplos_token_claims(token)
 
-  if (is.null(claims$tenant_id) || is.null(claims$user_id)) {
-    warning("The imported token is missing the Aplos NCA tenant or user claim. ",
-            "API calls may fail; check that the whole token was copied.",
-            call. = FALSE)
-  }
-
-  if (!is.null(claims$exp) && claims$exp <= .aplos_now()) {
-    stop("The token in '", path, "' expired at ",
-         format(as.POSIXct(claims$exp, origin = "1970-01-01", tz = "UTC"),
-                "%Y-%m-%d %H:%M:%S UTC"),
-         ". Download a new token and replace the file contents.",
-         call. = FALSE)
-  }
-
-  if (is.null(client_id) || !nzchar(client_id)) {
-    client_id <- config$client_id
-  }
+  if (is.null(client_id) || !nzchar(client_id)) client_id <- config$client_id
   if (is.null(client_id) || !nzchar(client_id)) {
     client_id <- Sys.getenv("APLOS_COGNITO_CLIENT_ID", "")
   }
-  if (is.null(region) || !nzchar(region)) {
-    region <- config$region
-  }
+  if (!is.null(client_id) && !nzchar(client_id)) client_id <- NULL
+
+  if (is.null(region) || !nzchar(region)) region <- config$region
   if (is.null(region) || !nzchar(region)) {
     region <- Sys.getenv("APLOS_COGNITO_REGION", "")
   }
-  if (!is.null(client_id) && !nzchar(client_id)) client_id <- NULL
   if (!is.null(region) && !nzchar(region)) region <- NULL
 
-  refresh_token <- config$refresh_token
-  if (!is.null(refresh_token) && (is.null(client_id) || is.null(region))) {
-    warning("The token file contains a refresh token, but no client ID or region ",
-            "was found, so automatic renewal is disabled. Add COGNITO_CLIENT_KEY ",
-            "and COGNITO_REGION to the file, or pass client_id and region.",
+  first <- config$token
+  legacy_jwt <- !is.null(first) && .aplos_looks_like_jwt(first)
+
+  if (legacy_jwt) {
+    token <- .aplos_validate_jwt(first)
+    refresh_token <- config$refresh_token
+    if (!is.null(refresh_token) && (is.null(client_id) || is.null(region))) {
+      warning("The file contains a refresh token, but no client ID or region was found, ",
+              "so automatic renewal is disabled. Add COGNITO_CLIENT_KEY and ",
+              "COGNITO_REGION to the file, or pass client_id and region.",
+              call. = FALSE)
+      refresh_token <- NULL
+    }
+  } else {
+    refresh_token <- config$refresh_token %||% first
+    if (is.null(refresh_token) || !nzchar(refresh_token)) {
+      stop("No refresh token found in '", path, "'.", call. = FALSE)
+    }
+    if (is.null(client_id) || is.null(region)) {
+      stop("The value in '", path, "' is not a valid JWT, and no Cognito client ID ",
+           "and region were supplied to use it as a refresh token. Add ",
+           "COGNITO_CLIENT_KEY and COGNITO_REGION to the file, or pass ",
+           "client_id and region.", call. = FALSE)
+    }
+    exchanged <- .aplos_exchange_refresh_token(refresh_token, client_id, region)
+    token <- exchanged$token
+    refresh_token <- exchanged$refresh_token %||% refresh_token
+  }
+
+  claims <- .aplos_token_claims(token)
+
+  # A legacy JWT that is already expired can still be rescued with a refresh
+  # token, so try that before giving up.
+  if ((is.null(claims$exp) || claims$exp <= .aplos_now()) &&
+      !is.null(refresh_token) && !is.null(client_id) && !is.null(region)) {
+    exchanged <- .aplos_exchange_refresh_token(refresh_token, client_id, region)
+    token <- exchanged$token
+    refresh_token <- exchanged$refresh_token %||% refresh_token
+    claims <- .aplos_token_claims(token)
+  }
+
+  if (is.null(claims$tenant_id) || is.null(claims$user_id)) {
+    warning("The token is missing the Aplos NCA tenant or user claim. ",
+            "API calls may fail; check the refresh token and client settings.",
             call. = FALSE)
-    refresh_token <- NULL
+  }
+
+  if (is.null(claims$exp) || claims$exp <= .aplos_now()) {
+    expired_at <- if (is.null(claims$exp)) {
+      ""
+    } else {
+      paste0(" The token expired at ",
+             format(as.POSIXct(claims$exp, origin = "1970-01-01", tz = "UTC"),
+                    "%Y-%m-%d %H:%M:%S UTC"), ".")
+    }
+    stop("Could not obtain a valid Aplos NCA token from '", path, "'.",
+         expired_at, call. = FALSE)
   }
 
   .aplos_session_register(
@@ -210,13 +230,9 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
     token_file = path
   )
 
-  expiry_text <- if (is.null(claims$exp)) {
-    "expiry unknown"
-  } else {
-    paste0("expires ",
-           format(as.POSIXct(claims$exp, origin = "1970-01-01", tz = "UTC"),
-                  "%Y-%m-%d %H:%M:%S UTC"))
-  }
+  expiry_text <- paste0("expires ",
+                        format(as.POSIXct(claims$exp, origin = "1970-01-01", tz = "UTC"),
+                               "%Y-%m-%d %H:%M:%S UTC"))
   renewal_text <- if (is.null(refresh_token)) {
     "no refresh token"
   } else {

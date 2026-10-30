@@ -30,43 +30,38 @@ them in scripts. See `?aplos_get_jwt` for the file format.
 
 ### Single sign-on (SSO)
 
-SSO accounts cannot authenticate with a username and password. Instead, copy
-the token from the Aplos NCA web interface and save it on one line in a hidden
-file in your home directory:
+SSO accounts cannot authenticate with a username and password. You only need the
+**refresh token** from the Aplos NCA web interface, plus the Cognito client ID
+and region shown in API Settings. The package exchanges the refresh token for a
+JWT and renews it automatically.
+
+Save the three values in a hidden file:
 
 ```bash
 chmod 600 ~/.token
 ```
 
+```
+REFRESH_TOKEN="your_refresh_token"
+COGNITO_CLIENT_KEY="your_cognito_client_id"
+COGNITO_REGION="us-east-1"
+```
+
 ```r
-token <- aplos_import_jwt()          # reads ~/.token
+token <- aplos_import_jwt()          # reads ~/.token, returns a JWT
 # or: token <- aplos_import_jwt("~/path/to/token")
 
 result <- aplos_get_upload_url("data.csv",
                                "https://api.app.aplos-nca.com", token)
 ```
 
-If the file also contains a Cognito refresh token, the package renews the JWT
-automatically when less than 20 minutes remain — the same behaviour as a
-password login. Accepted layouts:
+A file with only the refresh token also works when `client_id` and `region` are
+passed as arguments, or set as `APLOS_COGNITO_CLIENT_ID` /
+`APLOS_COGNITO_REGION`. A file containing a bare JWT is still accepted for
+backwards compatibility, but such a token cannot be renewed: it works until it
+expires, then the package stops and asks for a refresh token.
 
-```
-# Positional: line 1 = token, optional line 2 = refresh token
-eyJraWQiOi...
-eyJjdHkiOi...
-```
-
-```
-# Key/value
-JWT="eyJraWQiOi..."
-REFRESH_TOKEN="eyJjdHkiOi..."
-COGNITO_CLIENT_KEY="your_cognito_client_id"
-COGNITO_REGION="us-east-1"
-```
-
-Without a refresh token, the package re-reads the file before each API call, so
-a token refreshed by another tool is picked up automatically. Set the
-`APLOS_JWT_FILE` environment variable to use a different default path.
+Set `APLOS_JWT_FILE` to use a different default path.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first.

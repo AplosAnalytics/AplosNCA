@@ -149,27 +149,37 @@
 
 # Exchange a Cognito refresh token for a new ID token. Returns
 # list(token = <id token>, refresh_token = <rotated token or NULL>).
-.aplos_cognito_refresh <- function(session) {
-  if (is.null(session$client_id) || is.null(session$region) || is.null(session$refresh_token)) {
-    stop("No refresh token is available for this session.", call. = FALSE)
+.aplos_exchange_refresh_token <- function(refresh_token, client_id, region) {
+  if (is.null(refresh_token) || !nzchar(refresh_token)) {
+    stop("A refresh token is required.", call. = FALSE)
+  }
+  if (is.null(client_id) || !nzchar(client_id)) {
+    stop("A Cognito client ID is required to use a refresh token.", call. = FALSE)
+  }
+  if (is.null(region) || !nzchar(region)) {
+    stop("A Cognito region is required to use a refresh token.", call. = FALSE)
   }
 
   headers <- c("Content-Type" = "application/x-amz-json-1.1",
                "X-Amz-Target" = "AWSCognitoIdentityProviderService.InitiateAuth")
   body <- list(
     AuthFlow = "REFRESH_TOKEN_AUTH",
-    AuthParameters = list("REFRESH_TOKEN" = session$refresh_token),
-    ClientId = session$client_id
+    AuthParameters = list("REFRESH_TOKEN" = refresh_token),
+    ClientId = client_id
   )
 
-  response <- httr::POST(
-    url = paste0("https://cognito-idp.", session$region, ".amazonaws.com/"),
-    httr::add_headers(.headers = headers),
-    body = jsonlite::toJSON(body, auto_unbox = TRUE)
+  response <- tryCatch(
+    httr::POST(
+      url = paste0("https://cognito-idp.", region, ".amazonaws.com/"),
+      httr::add_headers(.headers = headers),
+      body = jsonlite::toJSON(body, auto_unbox = TRUE)
+    ),
+    error = function(e) stop("Token refresh request failed: ", e$message, call. = FALSE)
   )
 
   if (httr::http_error(response)) {
-    stop(.aplos_cognito_error(response), call. = FALSE)
+    stop("Cognito rejected the refresh token: ", .aplos_cognito_error(response),
+         call. = FALSE)
   }
 
   result <- jsonlite::fromJSON(httr::content(response, "text", encoding = "UTF-8"))
@@ -183,6 +193,14 @@
   }
 
   list(token = auth$IdToken, refresh_token = auth$RefreshToken %||% NULL)
+}
+
+.aplos_cognito_refresh <- function(session) {
+  .aplos_exchange_refresh_token(
+    refresh_token = session$refresh_token,
+    client_id = session$client_id,
+    region = session$region
+  )
 }
 
 # Read and validate a JWT from a token file.
@@ -210,12 +228,29 @@
   gsub("^[\"']|[\"']$", "", value)
 }
 
+# A Cognito refresh token is opaque and can contain dots, so do not rely on the
+# number of segments alone: only treat a value as a JWT if it decodes and has an
+# expiry claim.
+.aplos_looks_like_jwt <- function(value) {
+  if (!is.character(value) || length(value) != 1L || is.na(value)) {
+    return(FALSE)
+  }
+  parts <- strsplit(value, ".", fixed = TRUE)[[1]]
+  if (length(parts) != 3L || any(!nzchar(parts))) {
+    return(FALSE)
+  }
+  payload <- tryCatch(AzureAuth::decode_jwt(value)$payload, error = function(e) NULL)
+  !is.null(payload) && !is.null(payload$exp)
+}
+
 # Read a token file. Two layouts are supported:
 #
-#   * positional:  line 1 = ID token, optional line 2 = refresh token
+#   * positional:  line 1 = refresh token (or a legacy ID token),
+#                  optional line 2 = refresh token
 #   * key/value:   JWT=..., REFRESH_TOKEN=..., COGNITO_CLIENT_KEY=..., COGNITO_REGION=...
 #
 # Returns list(token, refresh_token, client_id, region); absent values are NULL.
+# `token` is not validated here because it may be a refresh token.
 .aplos_read_token_config <- function(path, warn_perm = TRUE) {
   path <- normalizePath(path.expand(path), winslash = "/", mustWork = FALSE)
   if (!file.exists(path)) {
@@ -266,12 +301,14 @@
     }
   }
 
-  if (is.null(config$token) || !nzchar(config$token)) {
-    stop("No JWT found in token file: ", path, call. = FALSE)
-  }
-  config$token <- .aplos_validate_jwt(config$token)
   if (!is.null(config$refresh_token) && !nzchar(config$refresh_token)) {
     config$refresh_token <- NULL
+  }
+  if (!is.null(config$token) && !nzchar(config$token)) {
+    config$token <- NULL
+  }
+  if (is.null(config$token) && is.null(config$refresh_token)) {
+    stop("No token found in token file: ", path, call. = FALSE)
   }
   config
 }

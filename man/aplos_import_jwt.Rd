@@ -2,68 +2,57 @@
 % Please edit documentation in R/auth.R
 \name{aplos_import_jwt}
 \alias{aplos_import_jwt}
-\title{Import an Aplos NCA JWT Token from a File}
+\title{Import Aplos NCA Credentials from a File}
 \usage{
 aplos_import_jwt(path = NULL, client_id = NULL, region = NULL)
 }
 \arguments{
-\item{path}{Path to the file containing the JWT. Defaults to the value of
-the \code{APLOS_JWT_FILE} environment variable when set, otherwise \code{~/.token}.}
+\item{path}{Path to the file. Defaults to the \code{APLOS_JWT_FILE} environment
+variable when set, otherwise \code{~/.token}.}
 
-\item{client_id}{Optional Cognito client ID used to refresh the token.
-Defaults to the \code{COGNITO_CLIENT_KEY} value in the file, then the
-\code{APLOS_COGNITO_CLIENT_ID} environment variable.}
+\item{client_id}{Cognito client ID that issued the refresh token. Defaults to
+\code{COGNITO_CLIENT_KEY} in the file, then \code{APLOS_COGNITO_CLIENT_ID}.}
 
-\item{region}{Optional AWS region used to refresh the token. Defaults to the
-\code{COGNITO_REGION} value in the file, then the
-\code{APLOS_COGNITO_REGION} environment variable.}
+\item{region}{AWS region of the user pool. Defaults to \code{COGNITO_REGION} in
+the file, then \code{APLOS_COGNITO_REGION}.}
 }
 \value{
 The JWT token, invisibly.
 }
 \description{
-Reads a JWT from a hidden text file so that it can be used with the other
-Aplos NCA API functions. This is the authentication path for users who sign
-in through single sign-on (SSO), because SSO accounts cannot authenticate
-with a username and password through \code{\link[=aplos_get_jwt]{aplos_get_jwt()}}.
+Reads a Cognito refresh token from a hidden text file, exchanges it for a
+JWT, and registers both for use with the other Aplos NCA API functions. This
+is the authentication path for users who sign in through single sign-on
+(SSO), because SSO accounts cannot authenticate with a username and password
+through \code{\link[=aplos_get_jwt]{aplos_get_jwt()}}.
 
-Obtain the token from the Aplos NCA web interface and save it on a single
-line in a file in your home directory, for example \code{~/.token}. A leading
-\verb{Bearer } prefix is allowed. Restrict the file so that only you can read it
-(\verb{chmod 600 ~/.token} on macOS and Linux). The token is never printed by the
-package and is not written anywhere else.
+SSO users only need the refresh token from the Aplos NCA web interface,
+together with the Cognito client ID and region shown in API Settings. The
+package obtains the JWT itself and renews it automatically, so the file does
+not have to be refreshed every hour.
 
-The file may hold just the JWT, or the JWT plus a Cognito refresh token so
-that the package can renew it automatically. Two layouts are accepted:
+Save the values in a hidden file in your home directory, for example
+\code{~/.token}, and restrict it (\verb{chmod 600 ~/.token} on macOS and Linux):
 
 \preformatted{
-# Positional: line 1 = token, optional line 2 = refresh token
-eyJraWQiOi...
-eyJjdHkiOi...
-
-# Key/value
-JWT="eyJraWQiOi..."
-REFRESH_TOKEN="eyJjdHkiOi..."
-COGNITO_CLIENT_KEY="your_cognito_client_id"
+REFRESH_TOKEN="..."
+COGNITO_CLIENT_KEY="..."
 COGNITO_REGION="us-east-1"
 }
 
-Tokens expire one hour after they are issued. When the file includes a
-refresh token (and a client ID and region), the package exchanges it for a
-new JWT when less than 20 minutes remain, exactly as it does for
-\code{\link[=aplos_get_jwt]{aplos_get_jwt()}}. Without a refresh token, it re-reads the file before each
-API call so a token refreshed by another tool is picked up automatically; if
-the file still contains an expired token, the call stops with a message
-asking you to update it.
+A single line containing only the refresh token is also accepted when
+\code{client_id} and \code{region} are supplied as arguments or environment variables
+(\code{APLOS_COGNITO_CLIENT_ID}, \code{APLOS_COGNITO_REGION}).
+
+A file containing a JWT instead of a refresh token is still accepted for
+backwards compatibility, but such a token cannot be renewed by the package:
+it is used until it expires, then the call stops with a message asking for a
+refresh token.
 }
 \examples{
 \dontrun{
-  # SSO users: save the token from the web interface to ~/.token first.
+  # SSO users: save the refresh token and client settings to ~/.token first.
   token <- aplos_import_jwt()
-
-  # With a refresh token in the file or supplied here:
-  token <- aplos_import_jwt("~/.token", client_id = "your_client_id",
-                            region = "us-east-1")
 
   result <- aplos_get_upload_url("data.csv",
                                  "https://api.app.aplos-nca.com", token)

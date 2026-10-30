@@ -452,3 +452,101 @@ test_that("a refresh token without client ID or region is ignored with a warning
   session <- AplosNCA:::.aplos_session_get(token)
   expect_null(session$refresh_token)
 })
+
+test_that("a refresh-token-only file is exchanged for a JWT at import", {
+  AplosNCA:::.aplos_state_reset()
+  path <- local_tempfile(fileext = ".token")
+  writeLines("opaque-refresh-value", path)
+  minted <- "minted.id.token"
+
+  local_mocked_bindings(
+    decode_jwt = function(token, ...) {
+      if (identical(token, minted)) mock_claims(as.numeric(Sys.time()) + 3600) else NULL
+    },
+    .package = "AzureAuth"
+  )
+  local_mocked_bindings(
+    POST = function(...) mock_response(200L, toJSON(list(
+      AuthenticationResult = list(
+        IdToken = minted,
+        AccessToken = "access-token",
+        ExpiresIn = 3600,
+        TokenType = "Bearer"
+      )
+    ), auto_unbox = TRUE)),
+    .package = "httr"
+  )
+
+  expect_message(
+    token <- aplos_import_jwt(path, client_id = "client-1", region = "us-east-1"),
+    "refresh token available"
+  )
+  expect_equal(token, minted)
+
+  session <- AplosNCA:::.aplos_session_get(token)
+  expect_equal(session$refresh_token, "opaque-refresh-value")
+  expect_equal(session$client_id, "client-1")
+  expect_equal(session$region, "us-east-1")
+})
+
+test_that("key/value files with only a refresh token work", {
+  AplosNCA:::.aplos_state_reset()
+  path <- local_tempfile(fileext = ".token")
+  writeLines(c(
+    'REFRESH_TOKEN="kv-refresh-value"',
+    'COGNITO_CLIENT_KEY="client-7"',
+    'COGNITO_REGION="us-west-2"'
+  ), path)
+  minted <- "kv.minted.token"
+
+  local_mocked_bindings(
+    decode_jwt = function(token, ...) {
+      if (identical(token, minted)) mock_claims(as.numeric(Sys.time()) + 3600) else NULL
+    },
+    .package = "AzureAuth"
+  )
+  local_mocked_bindings(
+    POST = function(...) mock_response(200L, toJSON(list(
+      AuthenticationResult = list(IdToken = minted, ExpiresIn = 3600, TokenType = "Bearer")
+    ), auto_unbox = TRUE)),
+    .package = "httr"
+  )
+
+  expect_message(aplos_import_jwt(path), "refresh token available")
+  session <- AplosNCA:::.aplos_session_get(minted)
+  expect_equal(session$refresh_token, "kv-refresh-value")
+  expect_equal(session$client_id, "client-7")
+  expect_equal(session$region, "us-west-2")
+})
+
+test_that("a refresh token without client settings gives a clear error", {
+  AplosNCA:::.aplos_state_reset()
+  path <- local_tempfile(fileext = ".token")
+  writeLines("orphan-refresh-value", path)
+  local_envvar(APLOS_COGNITO_CLIENT_ID = "", APLOS_COGNITO_REGION = "")
+
+  expect_error(aplos_import_jwt(path), "not a valid JWT")
+})
+
+test_that("a rejected refresh token is reported at import", {
+  AplosNCA:::.aplos_state_reset()
+  path <- local_tempfile(fileext = ".token")
+  writeLines("bad-refresh-value", path)
+
+  local_mocked_bindings(
+    decode_jwt = function(...) NULL,
+    .package = "AzureAuth"
+  )
+  local_mocked_bindings(
+    POST = function(...) mock_response(400L, toJSON(list(
+      `__type` = "NotAuthorizedException",
+      message = "Refresh Token has expired"
+    ), auto_unbox = TRUE)),
+    .package = "httr"
+  )
+
+  expect_error(
+    aplos_import_jwt(path, client_id = "client-1", region = "us-east-1"),
+    "Cognito rejected the refresh token"
+  )
+})
