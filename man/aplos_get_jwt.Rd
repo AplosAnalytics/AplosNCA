@@ -4,7 +4,7 @@
 \alias{aplos_get_jwt}
 \title{Obtain Aplos NCA API JWT Token}
 \usage{
-aplos_get_jwt(client_id, username, password, region)
+aplos_get_jwt(client_id, username, password, region, return_refresh = FALSE)
 }
 \arguments{
 \item{client_id}{The Cognito client ID.}
@@ -14,12 +14,36 @@ aplos_get_jwt(client_id, username, password, region)
 \item{password}{Your Aplos NCA password.}
 
 \item{region}{The AWS region (e.g., "us-east-1").}
+
+\item{return_refresh}{Logical; if \code{TRUE}, return a list with the JWT and the
+Aplos NCA Refresh Token instead of just the JWT (default \code{FALSE}). The
+Aplos NCA Refresh Token is captured either way and used for automatic renewal.}
 }
 \value{
-A character string containing the JWT token.
+A character string containing the JWT token, or, when
+\code{return_refresh = TRUE}, a list with elements \code{token} and \code{refresh_token}.
 }
 \description{
-Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT. The JWT is only valid for a period of time (~15 minutes). Each time you make an API call with a valid JWT, that token is refreshed and the valid period is extended. Thus during a normal analysis you will only need to authenticate once as you will be making API calls within the valid time window. However, if you walk away from your computer or there is a long delay between API calls you may need to authenticate again.
+Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT.
+
+The Aplos NCA JWT expires one hour after it is issued. The package checks the JWT
+before every API call and, when less than 20 minutes remain, transparently
+refreshes it using the Aplos NCA Refresh Token returned at login. This refresh
+happens inside the API functions, so a script can keep using the token
+object returned here without authenticating again.
+
+If the Aplos NCA Refresh Token is rejected or unavailable, the API call stops with a
+message asking you to authenticate again; the package never retries with a
+stored password.
+
+Users who sign in through single sign-on (SSO) cannot use username/password
+authentication. Those users should copy an Aplos NCA Refresh Token from
+their profile page (API Settings) in the Aplos NCA web application and use
+\code{\link[=aplos_import_jwt]{aplos_import_jwt()}} instead.
+
+The API URL is not involved in authentication: Cognito is addressed with the
+client ID and AWS region. The URL identifies the Aplos NCA API and is passed
+to the analysis functions.
 
 Note: Store credentials securely; do not hardcode them in scripts. It is recommended that you use a hidden text file (e.g. ".aplos_creds") stored on your local computer. Read that file in and then parse it to update the required information for authentication. An example credential file may look like the following:
 APLOS_API_URL="https://api.app.aplos-nca.com"
@@ -34,4 +58,7 @@ All of this information can be found in your user profile for your Aplos NCA acc
   token <- aplos_get_jwt(client_id = "your_client_id", username = "user",
                          password = "pass", region = "us-east-1")
 }
+}
+\seealso{
+\code{\link[=aplos_import_jwt]{aplos_import_jwt()}} for SSO users.
 }

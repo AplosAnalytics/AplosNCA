@@ -9,7 +9,9 @@ aplos_execution_status(url, token, execution_id, sleep = 10)
 \arguments{
 \item{url}{The base API URL.}
 
-\item{token}{JWT token.}
+\item{token}{JWT token from aplos_get_jwt() or aplos_import_jwt().
+The token is checked again on every poll, so a long-running analysis keeps
+working when the original token expires.}
 
 \item{execution_id}{The execution ID from aplos_execute_analysis().}
 

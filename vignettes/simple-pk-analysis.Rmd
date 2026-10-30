@@ -23,7 +23,9 @@ This vignette demonstrates a simple pharmacokinetic (PK) analysis using the Aplo
 
 We'll use example data (`ex1-data.csv`) and configuration (`ex1-analysis.json`) included in the package. The example data included concentration-time data for 10 subjects following administration of an extravascular dose. In practice, replace these with your own files. Note that to use Aplos NCA, you must upload a file to the system, thus if you have a dataframe inside R with the concentration-time data, please write that to a CSV file which can then be uploaded to Aplos NCA.
 
-**Prerequisites**: Set up your credentials in a local file (e.g., `~/.aplos_creds`) as described in `?aplos_get_jwt`. This vignette assumes the package functions are loaded.
+**Prerequisites**: Set up your credentials in a local file (e.g., `~/.aplos_creds`) as described in `?aplos_get_jwt`, or, if you sign in through single sign-on (SSO), save a token to a hidden file such as `~/.token` and use `aplos_import_jwt()` as described in `?aplos_import_jwt`. This vignette assumes the package functions are loaded.
+
+Tokens expire one hour after they are issued. The package refreshes them automatically when less than 20 minutes remain, so normally you authenticate once per session.
 
 ```{r load-package}
 library(AplosNCA)  # Load the package
@@ -51,6 +53,7 @@ Obtain a JWT token for API access.
 
 ```{r authenticate}
 # Simulated for vignette - in real use, call aplos_get_jwt(creds$COGNITO_CLIENT_KEY, ...)
+# SSO users: token <- aplos_import_jwt("~/.token")
 token <- "fake_token"
 url <- creds$APLOS_API_URL
 print("Authenticated (simulated)")

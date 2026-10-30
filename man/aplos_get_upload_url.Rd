@@ -11,7 +11,8 @@ aplos_get_upload_url(input_file, url, token)
 
 \item{url}{The base API URL.}
 
-\item{token}{JWT token from aplos_get_jwt().}
+\item{token}{JWT token from aplos_get_jwt() or aplos_import_jwt().
+Refreshed automatically when it is close to expiring.}
 }
 \value{
 A list with upload details.
