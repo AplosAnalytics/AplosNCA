@@ -35,6 +35,11 @@ SSO accounts cannot authenticate with a username and password. You only need the
 and region shown in API Settings. The package exchanges the refresh token for a
 JWT and renews it automatically.
 
+Refresh tokens have their own lifetime, configured on the Cognito app client
+(30 days by default). Using one does not extend it. When it expires or is
+revoked, `aplos_import_jwt()` fails with `Cognito rejected the refresh token`
+and you import a new one.
+
 Save the three values in a hidden file:
 
 ```bash

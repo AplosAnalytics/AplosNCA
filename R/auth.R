@@ -105,6 +105,11 @@ aplos_get_jwt <- function(client_id, username, password, region,
 #' package obtains the JWT itself and renews it automatically, so the file does
 #' not have to be refreshed every hour.
 #'
+#' Refresh tokens have their own lifetime, set on the Cognito app client (30
+#' days by default), and using one does not extend it. When it expires or is
+#' revoked, this function fails with a "Cognito rejected the refresh token"
+#' message and a new refresh token must be imported.
+#'
 #' Save the values in a hidden file in your home directory, for example
 #' `~/.token`, and restrict it (`chmod 600 ~/.token` on macOS and Linux):
 #'
