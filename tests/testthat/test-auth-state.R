@@ -42,7 +42,7 @@ test_that("aplos_import_jwt reads a token file and registers the token", {
     .package = "AzureAuth"
   )
 
-  expect_message(imported <- aplos_import_jwt(path), "Imported Aplos NCA token")
+  expect_message(imported <- aplos_import_jwt(path), "Imported Aplos NCA JWT")
   expect_identical(imported, token)
 
   context <- AplosNCA:::.aplos_auth_context(token)
@@ -63,7 +63,7 @@ test_that("aplos_import_jwt uses APLOS_JWT_FILE when no path is given", {
   )
   local_envvar(APLOS_JWT_FILE = path)
 
-  expect_message(token <- aplos_import_jwt(), "Imported Aplos NCA token")
+  expect_message(token <- aplos_import_jwt(), "Imported Aplos NCA JWT")
   expect_identical(token, "a.b.c")
 })
 
@@ -82,7 +82,7 @@ test_that("aplos_import_jwt rejects expired, missing, and malformed tokens", {
 
   bad_path <- local_tempfile(fileext = ".token")
   writeLines("not-a-jwt", bad_path)
-  expect_error(aplos_import_jwt(bad_path), "not a valid JWT")
+  expect_error(aplos_import_jwt(bad_path), "not a valid Aplos NCA JWT")
 })
 
 test_that("tokens inside the refresh window are refreshed transparently", {
@@ -331,7 +331,7 @@ test_that("imported token file paths are stored as absolute paths", {
   )
 
   local_dir(dirname(path))
-  expect_message(aplos_import_jwt(basename(path)), "Imported Aplos NCA token")
+  expect_message(aplos_import_jwt(basename(path)), "Imported Aplos NCA JWT")
 
   session <- AplosNCA:::.aplos_session_get(token)
   expect_equal(session$token_file, normalizePath(path, winslash = "/"))
@@ -352,7 +352,7 @@ test_that("refreshing an imported token does not repeat the permission warning",
   local_options(list(AplosNCA.refresh_window_seconds = 7200))
 
   expect_warning(
-    expect_message(aplos_import_jwt(path), "Imported Aplos NCA token"),
+    expect_message(aplos_import_jwt(path), "Imported Aplos NCA JWT"),
     "chmod 600"
   )
   expect_silent(AplosNCA:::.aplos_auth_context(token))
@@ -379,7 +379,7 @@ test_that("a refresh token in the file enables automatic renewal", {
 
   expect_message(
     aplos_import_jwt(path, client_id = "client-1", region = "us-east-1"),
-    "refresh token available"
+    "Aplos NCA Refresh Token available"
   )
 
   session <- AplosNCA:::.aplos_session_get(old_token)
@@ -424,7 +424,7 @@ test_that("key/value token files are parsed", {
     .package = "AzureAuth"
   )
 
-  expect_message(aplos_import_jwt(path), "refresh token available")
+  expect_message(aplos_import_jwt(path), "Aplos NCA Refresh Token available")
 
   session <- AplosNCA:::.aplos_session_get(token)
   expect_equal(session$refresh_token, "kv.refresh.token")
@@ -445,7 +445,7 @@ test_that("a refresh token without client ID or region is ignored with a warning
   local_envvar(APLOS_COGNITO_CLIENT_ID = "", APLOS_COGNITO_REGION = "")
 
   expect_warning(
-    expect_message(aplos_import_jwt(path), "no refresh token"),
+    expect_message(aplos_import_jwt(path), "no Aplos NCA Refresh Token"),
     "Add COGNITO_CLIENT_KEY"
   )
 
@@ -479,7 +479,7 @@ test_that("a refresh-token-only file is exchanged for a JWT at import", {
 
   expect_message(
     token <- aplos_import_jwt(path, client_id = "client-1", region = "us-east-1"),
-    "refresh token available"
+    "Aplos NCA Refresh Token available"
   )
   expect_equal(token, minted)
 
@@ -512,7 +512,7 @@ test_that("key/value files with only a refresh token work", {
     .package = "httr"
   )
 
-  expect_message(aplos_import_jwt(path), "refresh token available")
+  expect_message(aplos_import_jwt(path), "Aplos NCA Refresh Token available")
   session <- AplosNCA:::.aplos_session_get(minted)
   expect_equal(session$refresh_token, "kv-refresh-value")
   expect_equal(session$client_id, "client-7")
@@ -525,7 +525,7 @@ test_that("a refresh token without client settings gives a clear error", {
   writeLines("orphan-refresh-value", path)
   local_envvar(APLOS_COGNITO_CLIENT_ID = "", APLOS_COGNITO_REGION = "")
 
-  expect_error(aplos_import_jwt(path), "not a valid JWT")
+  expect_error(aplos_import_jwt(path), "not a valid Aplos NCA JWT")
 })
 
 test_that("a rejected refresh token is reported at import", {
@@ -547,6 +547,6 @@ test_that("a rejected refresh token is reported at import", {
 
   expect_error(
     aplos_import_jwt(path, client_id = "client-1", region = "us-east-1"),
-    "Cognito rejected the refresh token"
+    "Cognito rejected the Aplos NCA Refresh Token"
   )
 })

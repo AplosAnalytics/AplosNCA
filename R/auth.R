@@ -4,13 +4,13 @@
 #' @description
 #' Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT.
 #'
-#' The JWT expires one hour after it is issued. The package checks the token
+#' The Aplos NCA JWT expires one hour after it is issued. The package checks the JWT
 #' before every API call and, when less than 20 minutes remain, transparently
-#' refreshes it using the Cognito refresh token returned at login. This refresh
+#' refreshes it using the Aplos NCA Refresh Token returned at login. This refresh
 #' happens inside the API functions, so a script can keep using the token
 #' object returned here without authenticating again.
 #'
-#' If the refresh token is rejected or unavailable, the API call stops with a
+#' If the Aplos NCA Refresh Token is rejected or unavailable, the API call stops with a
 #' message asking you to authenticate again; the package never retries with a
 #' stored password.
 #'
@@ -31,8 +31,8 @@
 #' @param password Your Aplos NCA password.
 #' @param region The AWS region (e.g., "us-east-1").
 #' @param return_refresh Logical; if `TRUE`, return a list with the JWT and the
-#'   Cognito refresh token instead of just the JWT (default `FALSE`). The
-#'   refresh token is captured either way and used for automatic renewal.
+#'   Aplos NCA Refresh Token instead of just the JWT (default `FALSE`). The
+#'   Aplos NCA Refresh Token is captured either way and used for automatic renewal.
 #' @return A character string containing the JWT token, or, when
 #'   `return_refresh = TRUE`, a list with elements `token` and `refresh_token`.
 #' @seealso [aplos_import_jwt()] for SSO users.
@@ -72,10 +72,10 @@ aplos_get_jwt <- function(client_id, username, password, region,
   auth <- result$AuthenticationResult
   jwt <- auth$IdToken
   if (is.null(jwt) || !nzchar(jwt)) {
-    stop("JWT authentication failed: the response did not include an ID token.")
+    stop("JWT authentication failed: the response did not include an Aplos NCA JWT.")
   }
 
-  # Remember the refresh token so that near-expiry tokens can be renewed
+  # Remember the Aplos NCA Refresh Token so that near-expiry tokens can be renewed
   # without asking for the password again.
   .aplos_session_register(
     jwt,
@@ -94,21 +94,21 @@ aplos_get_jwt <- function(client_id, username, password, region,
 #' Import Aplos NCA Credentials from a File
 #'
 #' @description
-#' Reads a Cognito refresh token from a hidden text file, exchanges it for a
-#' JWT, and registers both for use with the other Aplos NCA API functions. This
+#' Reads an Aplos NCA Refresh Token from a hidden text file, exchanges it for an
+#' Aplos NCA JWT, and registers both for use with the other Aplos NCA API functions. This
 #' is the authentication path for users who sign in through single sign-on
 #' (SSO), because SSO accounts cannot authenticate with a username and password
 #' through [aplos_get_jwt()].
 #'
-#' SSO users only need the refresh token from the Aplos NCA web interface,
+#' SSO users only need the Aplos NCA Refresh Token from the Aplos NCA web interface,
 #' together with the Cognito client ID and region shown in API Settings. The
 #' package obtains the JWT itself and renews it automatically, so the file does
 #' not have to be refreshed every hour.
 #'
-#' Refresh tokens have their own lifetime, set on the Cognito app client (30
+#' Aplos NCA Refresh Tokens have their own lifetime, set on the Cognito app client (30
 #' days by default), and using one does not extend it. When it expires or is
-#' revoked, this function fails with a "Cognito rejected the refresh token"
-#' message and a new refresh token must be imported.
+#' revoked, this function fails with a "Cognito rejected the Aplos NCA Refresh Token"
+#' message and a new Aplos NCA Refresh Token must be imported.
 #'
 #' Save the values in a hidden file in your home directory, for example
 #' `~/.token`, and restrict it (`chmod 600 ~/.token` on macOS and Linux):
@@ -119,18 +119,18 @@ aplos_get_jwt <- function(client_id, username, password, region,
 #' COGNITO_REGION="us-east-1"
 #' }
 #'
-#' A single line containing only the refresh token is also accepted when
+#' A single line containing only the Aplos NCA Refresh Token is also accepted when
 #' `client_id` and `region` are supplied as arguments or environment variables
 #' (`APLOS_COGNITO_CLIENT_ID`, `APLOS_COGNITO_REGION`).
 #'
-#' A file containing a JWT instead of a refresh token is still accepted for
+#' A file containing an Aplos NCA JWT instead of an Aplos NCA Refresh Token is still accepted for
 #' backwards compatibility, but such a token cannot be renewed by the package:
 #' it is used until it expires, then the call stops with a message asking for a
-#' refresh token.
+#' Aplos NCA Refresh Token.
 #'
 #' @param path Path to the file. Defaults to the `APLOS_JWT_FILE` environment
 #'   variable when set, otherwise `~/.token`.
-#' @param client_id Cognito client ID that issued the refresh token. Defaults to
+#' @param client_id Cognito client ID that issued the Aplos NCA Refresh Token. Defaults to
 #'   `COGNITO_CLIENT_KEY` in the file, then `APLOS_COGNITO_CLIENT_ID`.
 #' @param region AWS region of the user pool. Defaults to `COGNITO_REGION` in
 #'   the file, then `APLOS_COGNITO_REGION`.
@@ -139,7 +139,7 @@ aplos_get_jwt <- function(client_id, username, password, region,
 #' @export
 #' @examples
 #' \dontrun{
-#'   # SSO users: save the refresh token and client settings to ~/.token first.
+#'   # SSO users: save the Aplos NCA Refresh Token and client settings to ~/.token first.
 #'   token <- aplos_import_jwt()
 #'
 #'   result <- aplos_get_upload_url("data.csv",
@@ -175,7 +175,7 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
     token <- .aplos_validate_jwt(first)
     refresh_token <- config$refresh_token
     if (!is.null(refresh_token) && (is.null(client_id) || is.null(region))) {
-      warning("The file contains a refresh token, but no client ID or region was found, ",
+      warning("The file contains an Aplos NCA Refresh Token, but no client ID or region was found, ",
               "so automatic renewal is disabled. Add COGNITO_CLIENT_KEY and ",
               "COGNITO_REGION to the file, or pass client_id and region.",
               call. = FALSE)
@@ -184,11 +184,11 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
   } else {
     refresh_token <- config$refresh_token %||% first
     if (is.null(refresh_token) || !nzchar(refresh_token)) {
-      stop("No refresh token found in '", path, "'.", call. = FALSE)
+      stop("No Aplos NCA Refresh Token found in '", path, "'.", call. = FALSE)
     }
     if (is.null(client_id) || is.null(region)) {
-      stop("The value in '", path, "' is not a valid JWT, and no Cognito client ID ",
-           "and region were supplied to use it as a refresh token. Add ",
+      stop("The value in '", path, "' is not a valid Aplos NCA JWT, and no Cognito client ID ",
+           "and region were supplied to use it as an Aplos NCA Refresh Token. Add ",
            "COGNITO_CLIENT_KEY and COGNITO_REGION to the file, or pass ",
            "client_id and region.", call. = FALSE)
     }
@@ -210,8 +210,8 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
   }
 
   if (is.null(claims$tenant_id) || is.null(claims$user_id)) {
-    warning("The token is missing the Aplos NCA tenant or user claim. ",
-            "API calls may fail; check the refresh token and client settings.",
+    warning("The Aplos NCA JWT is missing the Aplos NCA tenant or user claim. ",
+            "API calls may fail; check the Aplos NCA Refresh Token and client settings.",
             call. = FALSE)
   }
 
@@ -219,11 +219,11 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
     expired_at <- if (is.null(claims$exp)) {
       ""
     } else {
-      paste0(" The token expired at ",
+      paste0(" The Aplos NCA JWT expired at ",
              format(as.POSIXct(claims$exp, origin = "1970-01-01", tz = "UTC"),
                     "%Y-%m-%d %H:%M:%S UTC"), ".")
     }
-    stop("Could not obtain a valid Aplos NCA token from '", path, "'.",
+    stop("Could not obtain a valid Aplos NCA JWT from '", path, "'.",
          expired_at, call. = FALSE)
   }
 
@@ -239,11 +239,11 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
                         format(as.POSIXct(claims$exp, origin = "1970-01-01", tz = "UTC"),
                                "%Y-%m-%d %H:%M:%S UTC"))
   renewal_text <- if (is.null(refresh_token)) {
-    "no refresh token"
+    "no Aplos NCA Refresh Token"
   } else {
-    "refresh token available"
+    "Aplos NCA Refresh Token available"
   }
-  message("Imported Aplos NCA token from ", path, " (", expiry_text, "; ",
+  message("Imported Aplos NCA JWT from ", path, " (", expiry_text, "; ",
           renewal_text, ").")
 
   invisible(token)

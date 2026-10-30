@@ -10,7 +10,7 @@ aplos_import_jwt(path = NULL, client_id = NULL, region = NULL)
 \item{path}{Path to the file. Defaults to the \code{APLOS_JWT_FILE} environment
 variable when set, otherwise \code{~/.token}.}
 
-\item{client_id}{Cognito client ID that issued the refresh token. Defaults to
+\item{client_id}{Cognito client ID that issued the Aplos NCA Refresh Token. Defaults to
 \code{COGNITO_CLIENT_KEY} in the file, then \code{APLOS_COGNITO_CLIENT_ID}.}
 
 \item{region}{AWS region of the user pool. Defaults to \code{COGNITO_REGION} in
@@ -20,21 +20,21 @@ the file, then \code{APLOS_COGNITO_REGION}.}
 The JWT token, invisibly.
 }
 \description{
-Reads a Cognito refresh token from a hidden text file, exchanges it for a
+Reads an Aplos NCA Refresh Token from a hidden text file, exchanges it for a
 JWT, and registers both for use with the other Aplos NCA API functions. This
 is the authentication path for users who sign in through single sign-on
 (SSO), because SSO accounts cannot authenticate with a username and password
 through \code{\link[=aplos_get_jwt]{aplos_get_jwt()}}.
 
-SSO users only need the refresh token from the Aplos NCA web interface,
+SSO users only need the Aplos NCA Refresh Token from the Aplos NCA web interface,
 together with the Cognito client ID and region shown in API Settings. The
 package obtains the JWT itself and renews it automatically, so the file does
 not have to be refreshed every hour.
 
 Refresh tokens have their own lifetime, set on the Cognito app client (30
 days by default), and using one does not extend it. When it expires or is
-revoked, this function fails with a "Cognito rejected the refresh token"
-message and a new refresh token must be imported.
+revoked, this function fails with a "Cognito rejected the Aplos NCA Refresh Token"
+message and a new Aplos NCA Refresh Token must be imported.
 
 Save the values in a hidden file in your home directory, for example
 \code{~/.token}, and restrict it (\verb{chmod 600 ~/.token} on macOS and Linux):
@@ -45,18 +45,18 @@ COGNITO_CLIENT_KEY="..."
 COGNITO_REGION="us-east-1"
 }
 
-A single line containing only the refresh token is also accepted when
+A single line containing only the Aplos NCA Refresh Token is also accepted when
 \code{client_id} and \code{region} are supplied as arguments or environment variables
 (\code{APLOS_COGNITO_CLIENT_ID}, \code{APLOS_COGNITO_REGION}).
 
-A file containing a JWT instead of a refresh token is still accepted for
+A file containing a JWT instead of an Aplos NCA Refresh Token is still accepted for
 backwards compatibility, but such a token cannot be renewed by the package:
 it is used until it expires, then the call stops with a message asking for a
-refresh token.
+Aplos NCA Refresh Token.
 }
 \examples{
 \dontrun{
-  # SSO users: save the refresh token and client settings to ~/.token first.
+  # SSO users: save the Aplos NCA Refresh Token and client settings to ~/.token first.
   token <- aplos_import_jwt()
 
   result <- aplos_get_upload_url("data.csv",

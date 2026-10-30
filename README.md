@@ -11,9 +11,9 @@ R package to use Aplos NCA API calls. This package includes functions that do th
 
 ## Authentication
 
-Aplos NCA API calls require a JWT. Tokens expire one hour after they are issued.
-The package checks the token before every API call and refreshes it
-automatically when less than 20 minutes remain (using the Cognito refresh token
+Aplos NCA API calls require an Aplos NCA JWT. JWTs expire one hour after they are issued.
+The package checks the Aplos NCA JWT before every API call and refreshes it
+automatically when less than 20 minutes remain (using the Aplos NCA Refresh Token
 from login), so you authenticate once per session in normal use.
 
 ### Username and password
@@ -31,13 +31,13 @@ them in scripts. See `?aplos_get_jwt` for the file format.
 ### Single sign-on (SSO)
 
 SSO accounts cannot authenticate with a username and password. You only need the
-**refresh token** from the Aplos NCA web interface, plus the Cognito client ID
-and region shown in API Settings. The package exchanges the refresh token for a
-JWT and renews it automatically.
+**Aplos NCA Refresh Token** from the Aplos NCA web interface, plus the Cognito client ID
+and region shown in API Settings. The package exchanges the Aplos NCA Refresh Token for an
+Aplos NCA JWT and renews it automatically.
 
-Refresh tokens have their own lifetime, configured on the Cognito app client
+Aplos NCA Refresh Tokens have their own lifetime, configured on the Cognito app client
 (30 days by default). Using one does not extend it. When it expires or is
-revoked, `aplos_import_jwt()` fails with `Cognito rejected the refresh token`
+revoked, `aplos_import_jwt()` fails with `Cognito rejected the Aplos NCA Refresh Token`
 and you import a new one.
 
 Save the three values in a hidden file:
@@ -53,18 +53,18 @@ COGNITO_REGION="us-east-1"
 ```
 
 ```r
-token <- aplos_import_jwt()          # reads ~/.token, returns a JWT
+token <- aplos_import_jwt()          # reads ~/.token, returns an Aplos NCA JWT
 # or: token <- aplos_import_jwt("~/path/to/token")
 
 result <- aplos_get_upload_url("data.csv",
                                "https://api.app.aplos-nca.com", token)
 ```
 
-A file with only the refresh token also works when `client_id` and `region` are
+A file with only the Aplos NCA Refresh Token also works when `client_id` and `region` are
 passed as arguments, or set as `APLOS_COGNITO_CLIENT_ID` /
-`APLOS_COGNITO_REGION`. A file containing a bare JWT is still accepted for
-backwards compatibility, but such a token cannot be renewed: it works until it
-expires, then the package stops and asks for a refresh token.
+`APLOS_COGNITO_REGION`. A file containing a bare Aplos NCA JWT is still accepted for
+backwards compatibility, but such a JWT cannot be renewed: it works until it
+expires, then the package stops and asks for an Aplos NCA Refresh Token.
 
 Set `APLOS_JWT_FILE` to use a different default path.
 

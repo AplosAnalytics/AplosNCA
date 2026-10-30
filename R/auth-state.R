@@ -36,7 +36,7 @@
 .aplos_session_register <- function(token, refresh_token = NULL, client_id = NULL,
                                     region = NULL, token_file = NULL) {
   if (!is.character(token) || length(token) != 1L || is.na(token) || !nzchar(token)) {
-    stop("A valid Aplos NCA token is required.", call. = FALSE)
+    stop("A valid Aplos NCA JWT is required.", call. = FALSE)
   }
 
   id <- unname(.aplos_state$lookup[token])
@@ -112,7 +112,7 @@
 
 .aplos_refresh_hint <- function(session) {
   if (!is.null(session$token_file)) {
-    paste0("Update the token in '", session$token_file, "' and run aplos_import_jwt(\"",
+    paste0("Update the Aplos NCA Refresh Token in '", session$token_file, "' and run aplos_import_jwt(\"",
            session$token_file, "\").")
   } else {
     "Run aplos_get_jwt() to start a new session."
@@ -120,14 +120,14 @@
 }
 
 .aplos_expiring_message <- function(session, exp, detail = NULL) {
-  msg <- paste0("The Aplos NCA token ", .aplos_time_left(exp),
+  msg <- paste0("The Aplos NCA JWT ", .aplos_time_left(exp),
                 " and cannot be refreshed automatically.")
   if (!is.null(detail) && nzchar(detail)) msg <- paste0(msg, " Refresh failed: ", detail, ".")
   paste(msg, .aplos_refresh_hint(session))
 }
 
 .aplos_expired_message <- function(session, exp, detail = NULL) {
-  msg <- paste0("The Aplos NCA token ", .aplos_time_left(exp),
+  msg <- paste0("The Aplos NCA JWT ", .aplos_time_left(exp),
                 " and could not be refreshed.")
   if (!is.null(detail) && nzchar(detail)) msg <- paste0(msg, " Refresh failed: ", detail, ".")
   paste(msg, .aplos_refresh_hint(session))
@@ -147,17 +147,17 @@
   message_text
 }
 
-# Exchange a Cognito refresh token for a new ID token. Returns
+# Exchange an Aplos NCA Refresh Token for a new Aplos NCA JWT. Returns
 # list(token = <id token>, refresh_token = <rotated token or NULL>).
 .aplos_exchange_refresh_token <- function(refresh_token, client_id, region) {
   if (is.null(refresh_token) || !nzchar(refresh_token)) {
-    stop("A refresh token is required.", call. = FALSE)
+    stop("An Aplos NCA Refresh Token is required.", call. = FALSE)
   }
   if (is.null(client_id) || !nzchar(client_id)) {
-    stop("A Cognito client ID is required to use a refresh token.", call. = FALSE)
+    stop("A Cognito client ID is required to use an Aplos NCA Refresh Token.", call. = FALSE)
   }
   if (is.null(region) || !nzchar(region)) {
-    stop("A Cognito region is required to use a refresh token.", call. = FALSE)
+    stop("A Cognito region is required to use an Aplos NCA Refresh Token.", call. = FALSE)
   }
 
   headers <- c("Content-Type" = "application/x-amz-json-1.1",
@@ -174,11 +174,11 @@
       httr::add_headers(.headers = headers),
       body = jsonlite::toJSON(body, auto_unbox = TRUE)
     ),
-    error = function(e) stop("Token refresh request failed: ", e$message, call. = FALSE)
+    error = function(e) stop("Aplos NCA JWT refresh request failed: ", e$message, call. = FALSE)
   )
 
   if (httr::http_error(response)) {
-    stop("Cognito rejected the refresh token: ", .aplos_cognito_error(response),
+    stop("Cognito rejected the Aplos NCA Refresh Token: ", .aplos_cognito_error(response),
          call. = FALSE)
   }
 
@@ -189,7 +189,7 @@
   }
   auth <- result$AuthenticationResult
   if (is.null(auth) || is.null(auth$IdToken) || !nzchar(auth$IdToken)) {
-    stop("Cognito did not return a new ID token.", call. = FALSE)
+    stop("Cognito did not return a new Aplos NCA JWT.", call. = FALSE)
   }
 
   list(token = auth$IdToken, refresh_token = auth$RefreshToken %||% NULL)
@@ -206,16 +206,16 @@
 # Read and validate a JWT from a token file.
 .aplos_validate_jwt <- function(token) {
   if (!is.character(token) || length(token) != 1L || is.na(token) || !nzchar(token)) {
-    stop("No token was found in the token file.", call. = FALSE)
+    stop("No Aplos NCA JWT was found in the file.", call. = FALSE)
   }
   parts <- strsplit(token, ".", fixed = TRUE)[[1]]
   if (length(parts) != 3L || any(!nzchar(parts))) {
-    stop("The token is not a valid JWT (expected three dot-separated parts).",
+    stop("The value is not a valid Aplos NCA JWT (expected three dot-separated parts).",
          call. = FALSE)
   }
   payload <- tryCatch(AzureAuth::decode_jwt(token)$payload, error = function(e) NULL)
   if (is.null(payload)) {
-    stop("The token could not be decoded; check that the file contains a complete JWT.",
+    stop("The Aplos NCA JWT could not be decoded; check that the file contains a complete Aplos NCA JWT.",
          call. = FALSE)
   }
   token
@@ -228,7 +228,7 @@
   gsub("^[\"']|[\"']$", "", value)
 }
 
-# A Cognito refresh token is opaque and can contain dots, so do not rely on the
+# A Aplos NCA Refresh Token is opaque and can contain dots, so do not rely on the
 # number of segments alone: only treat a value as a JWT if it decodes and has an
 # expiry claim.
 .aplos_looks_like_jwt <- function(value) {
@@ -245,12 +245,12 @@
 
 # Read a token file. Two layouts are supported:
 #
-#   * positional:  line 1 = refresh token (or a legacy ID token),
-#                  optional line 2 = refresh token
+#   * positional:  line 1 = Aplos NCA Refresh Token (or a legacy Aplos NCA JWT),
+#                  optional line 2 = Aplos NCA Refresh Token
 #   * key/value:   JWT=..., REFRESH_TOKEN=..., COGNITO_CLIENT_KEY=..., COGNITO_REGION=...
 #
 # Returns list(token, refresh_token, client_id, region); absent values are NULL.
-# `token` is not validated here because it may be a refresh token.
+# `token` is not validated here because it may be an Aplos NCA Refresh Token.
 .aplos_read_token_config <- function(path, warn_perm = TRUE) {
   path <- normalizePath(path.expand(path), winslash = "/", mustWork = FALSE)
   if (!file.exists(path)) {
@@ -308,7 +308,7 @@
     config$token <- NULL
   }
   if (is.null(config$token) && is.null(config$refresh_token)) {
-    stop("No token found in token file: ", path, call. = FALSE)
+    stop("No Aplos NCA JWT or Aplos NCA Refresh Token found in: ", path, call. = FALSE)
   }
   config
 }
@@ -357,7 +357,7 @@
       NULL
     })
   } else {
-    failure <- "no refresh token or token file is associated with this token"
+    failure <- "no Aplos NCA Refresh Token or credential file is associated with this Aplos NCA JWT"
   }
 
   if (is.null(refreshed)) {
@@ -375,8 +375,8 @@
   .aplos_session_update(session, refreshed$token, refreshed$refresh_token)
 
   if (isTRUE(getOption("AplosNCA.debug"))) {
-    source <- if (!is.null(session$refresh_token)) "Cognito refresh token" else "token file re-read"
-    message("Aplos NCA token refreshed (", source, ").")
+    source <- if (!is.null(session$refresh_token)) "Aplos NCA Refresh Token" else "Aplos NCA credential file re-read"
+    message("Aplos NCA JWT refreshed (", source, ").")
   }
 
   refreshed$token
@@ -387,7 +387,7 @@
 .aplos_auth_context <- function(token, content_type = "application/json") {
   if (missing(token) || is.null(token) || length(token) != 1L ||
       is.na(token) || !nzchar(token)) {
-    stop("A valid Aplos NCA token is required.", call. = FALSE)
+    stop("A valid Aplos NCA JWT is required.", call. = FALSE)
   }
 
   session <- .aplos_session_get(token)
@@ -395,7 +395,7 @@
   claims <- .aplos_token_claims(token)
 
   if (is.null(claims$tenant_id) || is.null(claims$user_id)) {
-    stop("The Aplos NCA token is missing the tenant or user claim. ",
+    stop("The Aplos NCA JWT is missing the tenant or user claim. ",
          "Authenticate again with aplos_get_jwt() or import a current token with aplos_import_jwt().",
          call. = FALSE)
   }

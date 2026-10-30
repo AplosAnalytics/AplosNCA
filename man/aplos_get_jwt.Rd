@@ -16,8 +16,8 @@ aplos_get_jwt(client_id, username, password, region, return_refresh = FALSE)
 \item{region}{The AWS region (e.g., "us-east-1").}
 
 \item{return_refresh}{Logical; if \code{TRUE}, return a list with the JWT and the
-Cognito refresh token instead of just the JWT (default \code{FALSE}). The
-refresh token is captured either way and used for automatic renewal.}
+Aplos NCA Refresh Token instead of just the JWT (default \code{FALSE}). The
+Aplos NCA Refresh Token is captured either way and used for automatic renewal.}
 }
 \value{
 A character string containing the JWT token, or, when
@@ -26,13 +26,13 @@ A character string containing the JWT token, or, when
 \description{
 Authenticates with the Aplos NCA API using AWS Cognito. This function sends a POST request to retrieve a JWT token for subsequent API calls. All API calls require a valid JWT.
 
-The JWT expires one hour after it is issued. The package checks the token
+The Aplos NCA JWT expires one hour after it is issued. The package checks the JWT
 before every API call and, when less than 20 minutes remain, transparently
-refreshes it using the Cognito refresh token returned at login. This refresh
+refreshes it using the Aplos NCA Refresh Token returned at login. This refresh
 happens inside the API functions, so a script can keep using the token
 object returned here without authenticating again.
 
-If the refresh token is rejected or unavailable, the API call stops with a
+If the Aplos NCA Refresh Token is rejected or unavailable, the API call stops with a
 message asking you to authenticate again; the package never retries with a
 stored password.
 
