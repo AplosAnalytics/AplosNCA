@@ -53,6 +53,10 @@ The package exchanges it for an Aplos NCA JWT and renews that JWT the same way.
 The refresh token can be reused in later sessions until it expires or is
 revoked, so one file is enough.
 
+The refresh token, client ID, and region belong to a single Aplos NCA instance
+(development, demo, or production). Those instances run separate Cognito user
+pools, so credentials are not interchangeable between them.
+
 ### The API URL
 
 The URL (for example `https://api.app.aplos-nca.com`) is not used to obtain

@@ -130,6 +130,14 @@ aplos_get_jwt <- function(client_id, username, password, region,
 #' `client_id` and `region` are supplied as arguments or environment variables
 #' (`APLOS_COGNITO_CLIENT_ID`, `APLOS_COGNITO_REGION`).
 #'
+#' The refresh token, client ID, and region belong to one Aplos NCA instance
+#' (development, demo, or production). They are not interchangeable between
+#' instances, which run separate Cognito user pools.
+#'
+#' The tenant and user identifiers are read from the JWT custom attributes. Both
+#' naming schemes are accepted: `custom:aplos_user_tenant_id` /
+#' `custom:aplos_user_id`, and `custom:tenant_id` / `custom:user_id`.
+#'
 #' A file containing an Aplos NCA JWT instead of an Aplos NCA Refresh Token is still accepted for
 #' backwards compatibility, but such a token cannot be renewed by the package:
 #' it is used until it expires, then the call stops with a message asking for a

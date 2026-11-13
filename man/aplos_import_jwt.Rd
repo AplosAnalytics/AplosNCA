@@ -51,6 +51,14 @@ A single line containing only the Aplos NCA Refresh Token is also accepted when
 \code{client_id} and \code{region} are supplied as arguments or environment variables
 (\code{APLOS_COGNITO_CLIENT_ID}, \code{APLOS_COGNITO_REGION}).
 
+The refresh token, client ID, and region belong to one Aplos NCA instance
+(development, demo, or production). They are not interchangeable between
+instances, which run separate Cognito user pools.
+
+The tenant and user identifiers are read from the JWT custom attributes. Both
+naming schemes are accepted: \code{custom:aplos_user_tenant_id} /
+\code{custom:aplos_user_id}, and \code{custom:tenant_id} / \code{custom:user_id}.
+
 A file containing a JWT instead of an Aplos NCA Refresh Token is still accepted for
 backwards compatibility, but such a token cannot be renewed by the package:
 it is used until it expires, then the call stops with a message asking for a
