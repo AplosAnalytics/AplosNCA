@@ -85,16 +85,34 @@
 
 # JWT claims used by the package. Returns NULLs instead of failing so that
 # opaque or mocked tokens keep working.
+# Read the first non-empty value among several claim names. Different Aplos NCA
+# instances have used different attribute names for the same values.
+.aplos_claim_value <- function(payload, names) {
+  for (name in names) {
+    value <- payload[[name]]
+    if (is.null(value) || length(value) != 1L) next
+    value <- as.character(value)
+    if (!is.na(value) && nzchar(value)) return(value)
+  }
+  NULL
+}
+
 .aplos_token_claims <- function(token) {
   payload <- tryCatch(AzureAuth::decode_jwt(token)$payload, error = function(e) NULL)
   if (is.null(payload)) {
-    return(list(exp = NULL, tenant_id = NULL, user_id = NULL))
+    return(list(exp = NULL, tenant_id = NULL, user_id = NULL,
+                claim_names = character(0)))
   }
   exp <- payload$exp
   list(
     exp = if (is.null(exp)) NULL else suppressWarnings(as.numeric(exp)),
-    tenant_id = payload[["custom:aplos_user_tenant_id"]] %||% NULL,
-    user_id = payload[["custom:aplos_user_id"]] %||% NULL
+    tenant_id = .aplos_claim_value(
+      payload, c("custom:aplos_user_tenant_id", "custom:tenant_id", "tenant_id")
+    ),
+    user_id = .aplos_claim_value(
+      payload, c("custom:aplos_user_id", "custom:user_id", "user_id")
+    ),
+    claim_names = names(payload)
   )
 }
 
@@ -395,7 +413,13 @@
   claims <- .aplos_token_claims(token)
 
   if (is.null(claims$tenant_id) || is.null(claims$user_id)) {
-    stop("The Aplos NCA JWT is missing the tenant or user claim. ",
+    claim_list <- if (length(claims$claim_names)) {
+      paste(claims$claim_names, collapse = ", ")
+    } else {
+      "none"
+    }
+    stop("The Aplos NCA JWT is missing the tenant or user claim. Claims present: ",
+         claim_list, ". ",
          "Authenticate again with aplos_get_jwt() or import a current token with aplos_import_jwt().",
          call. = FALSE)
   }

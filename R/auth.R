@@ -217,7 +217,13 @@ aplos_import_jwt <- function(path = NULL, client_id = NULL, region = NULL) {
   }
 
   if (is.null(claims$tenant_id) || is.null(claims$user_id)) {
+    claim_list <- if (length(claims$claim_names)) {
+      paste(claims$claim_names, collapse = ", ")
+    } else {
+      "none"
+    }
     warning("The Aplos NCA JWT is missing the Aplos NCA tenant or user claim. ",
+            "Claims present: ", claim_list, ". ",
             "API calls may fail; check the Aplos NCA Refresh Token and client settings.",
             call. = FALSE)
   }

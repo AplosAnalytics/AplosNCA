@@ -52,6 +52,28 @@ test_that("aplos_import_jwt reads a token file and registers the token", {
   expect_equal(context$headers[["Authorization"]], paste0("Bearer ", token))
 })
 
+test_that("tenant and user claims are accepted under the alternate attribute names", {
+  AplosNCA:::.aplos_state_reset()
+  token <- "alt.payload.signature"
+  path <- local_tempfile(fileext = ".token")
+  writeLines(token, path)
+  Sys.chmod(path, mode = "0600")
+
+  local_mocked_bindings(
+    decode_jwt = function(...) list(payload = list(
+      exp = as.numeric(Sys.time()) + 3600,
+      `custom:tenant_id` = "tenant-alt",
+      `custom:user_id` = "user-alt"
+    )),
+    .package = "AzureAuth"
+  )
+
+  expect_message(imported <- aplos_import_jwt(path), "Imported Aplos NCA JWT")
+  context <- AplosNCA:::.aplos_auth_context(imported)
+  expect_equal(context$tenant_id, "tenant-alt")
+  expect_equal(context$user_id, "user-alt")
+})
+
 test_that("aplos_import_jwt uses APLOS_JWT_FILE when no path is given", {
   AplosNCA:::.aplos_state_reset()
   path <- local_tempfile(fileext = ".token")

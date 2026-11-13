@@ -17,6 +17,10 @@
   Token for a JWT at import and renews it automatically, exactly like a
   password login. A bare JWT file is still accepted for backwards
   compatibility, but it cannot be renewed.
+* Tenant and user identifiers are read from `custom:aplos_user_tenant_id` /
+  `custom:aplos_user_id`, falling back to `custom:tenant_id` / `custom:user_id`,
+  because Aplos NCA instances name these attributes differently. A JWT that
+  carries neither set produces a warning that lists the claims it does contain.
 * Documentation now states that tokens expire one hour after issue, replacing
   the previous "~15 minutes, extended by each API call" description.
 
