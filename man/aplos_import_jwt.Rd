@@ -8,7 +8,7 @@ aplos_import_jwt(path = NULL, client_id = NULL, region = NULL)
 }
 \arguments{
 \item{path}{Path to the file. Defaults to the \code{APLOS_JWT_FILE} environment
-variable when set, otherwise \code{~/.token}.}
+variable when set, otherwise \verb{~/.token}.}
 
 \item{client_id}{Cognito client ID that issued the Aplos NCA Refresh Token. Defaults to
 \code{COGNITO_CLIENT_KEY} in the file, then \code{APLOS_COGNITO_CLIENT_ID}.}
@@ -20,8 +20,8 @@ the file, then \code{APLOS_COGNITO_REGION}.}
 The JWT token, invisibly.
 }
 \description{
-Reads an Aplos NCA Refresh Token from a hidden text file, exchanges it for a
-JWT, and registers both for use with the other Aplos NCA API functions. This
+Reads an Aplos NCA Refresh Token from a hidden text file, exchanges it for an
+Aplos NCA JWT, and registers both for use with the other Aplos NCA API functions. This
 is the authentication path for users who sign in through single sign-on
 (SSO), because SSO accounts cannot authenticate with a username and password
 through \code{\link[=aplos_get_jwt]{aplos_get_jwt()}}.
@@ -33,13 +33,13 @@ Aplos NCA JWT itself and renews it automatically, so the file does not have
 to be refreshed every hour. The API URL is not involved in authentication;
 it is passed to the analysis functions.
 
-Refresh tokens have their own lifetime, set on the Cognito app client (30
+Aplos NCA Refresh Tokens have their own lifetime, set on the Cognito app client (30
 days by default), and using one does not extend it. When it expires or is
 revoked, this function fails with a "Cognito rejected the Aplos NCA Refresh Token"
 message and a new Aplos NCA Refresh Token must be imported.
 
 Save the values in a hidden file in your home directory, for example
-\code{~/.token}, and restrict it (\verb{chmod 600 ~/.token} on macOS and Linux):
+\verb{~/.token}, and restrict it (\verb{chmod 600 ~/.token} on macOS and Linux):
 
 \preformatted{
 REFRESH_TOKEN="..."
@@ -59,7 +59,7 @@ The tenant and user identifiers are read from the JWT custom attributes. Both
 naming schemes are accepted: \code{custom:aplos_user_tenant_id} /
 \code{custom:aplos_user_id}, and \code{custom:tenant_id} / \code{custom:user_id}.
 
-A file containing a JWT instead of an Aplos NCA Refresh Token is still accepted for
+A file containing an Aplos NCA JWT instead of an Aplos NCA Refresh Token is still accepted for
 backwards compatibility, but such a token cannot be renewed by the package:
 it is used until it expires, then the call stops with a message asking for a
 Aplos NCA Refresh Token.
