@@ -35,7 +35,8 @@ aplos_execute_analysis(
 
 \item{url}{The base API URL.}
 
-\item{token}{JWT token.}
+\item{token}{JWT token from aplos_get_jwt() or aplos_import_jwt().
+Refreshed automatically when it is close to expiring.}
 
 \item{name}{Analysis name (default "NCA Analysis via R").}
 

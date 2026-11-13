@@ -70,6 +70,14 @@ test_that("aplos_get_upload_url retrieves URL with mock", {
     .package = "httr"
   )
 
+  local_mocked_bindings(
+    decode_jwt = function(...) list(payload = list(
+      `custom:aplos_user_tenant_id` = "fake_tenant",
+      `custom:aplos_user_id` = "fake_user"
+    )),
+    .package = "AzureAuth"
+  )
+
   result <- aplos_get_upload_url(
     input_file = "fake_file.csv",
     url = "https://api.example.com",

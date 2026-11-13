@@ -23,7 +23,9 @@ This vignette demonstrates a full pharmacokinetic (PK) analysis using the Aplos 
 
 We'll use example data (`ex2-data.csv`) and 5 configuration files (`ex2-data_cleaning.json`, `ex2-analysis.json`, `ex2-calcs.json`, `ex2-plots.json`, `ex2-tables.json`) included in the package. The example data includes concentration-time data for 12 subjects following administration of an extravascular dose under fed and fasted conditions. The data cleaning step will add treatment information, add units, and perform BLQ handling. The analysis will calculate the PK parameters. The custom calculations will calculate the relative bioavailability for AUC and Cmax for the fed condition. Then tables and plots will be created.
 
-**Prerequisites**: Set up your credentials in a local file (e.g., `~/.aplos_creds`) as described in `?aplos_get_jwt`. This vignette assumes the package functions are loaded.
+**Prerequisites**: Set up your credentials in a local file (e.g., `~/.aplos_creds`) as described in `?aplos_get_jwt`, or, if you sign in through single sign-on (SSO), save a token to a hidden file such as `~/.token` and use `aplos_import_jwt()` as described in `?aplos_import_jwt`. This vignette assumes the package functions are loaded.
+
+Tokens expire one hour after they are issued. The package refreshes them automatically when less than 20 minutes remain, so normally you authenticate once per session.
 
 ```{r load-package}
 library(AplosNCA)  # Load the package
@@ -51,6 +53,7 @@ Obtain a JWT token for API access.
 
 ```{r authenticate}
 # Simulated for vignette - in real use, call aplos_get_jwt(creds$COGNITO_CLIENT_KEY, ...)
+# SSO users: token <- aplos_import_jwt("~/.token")
 token <- "fake_token"
 url <- creds$APLOS_API_URL
 print("Authenticated (simulated)")

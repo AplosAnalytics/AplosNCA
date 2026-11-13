@@ -11,7 +11,8 @@
 #' @param tables JSON string for custom tables (default "{}").
 #' @param metadata JSON string for metadata (default "{}").
 #' @param url The base API URL.
-#' @param token JWT token.
+#' @param token JWT token from aplos_get_jwt() or aplos_import_jwt().
+#'   Refreshed automatically when it is close to expiring.
 #' @param name Analysis name (default "NCA Analysis via R").
 #' @param save_body Logical; save body of API POST command to body.txt file? (default FALSE, set to TRUE for debugging).
 #' @return The execution ID.
@@ -33,10 +34,10 @@ aplos_execute_analysis <- function(result, data_cleaning = "{}", analysis = "{}"
     stop("At least one of data_cleaning, analysis, calcs, plots, or tables must be provided (non-default value).")
   }
 
-  tenant_id <- AzureAuth::decode_jwt(token)$payload$`custom:aplos_user_tenant_id`
-  user_id <- AzureAuth::decode_jwt(token)$payload$`custom:aplos_user_id`
-  headers <- c("Content-Type" = "application/json",
-               "Authorization" = paste0("Bearer ", token))
+  context <- .aplos_auth_context(token)
+  tenant_id <- context$tenant_id
+  user_id <- context$user_id
+  headers <- context$headers
   file_id <- result$data$fileId
   body_string <- paste0(
     '{\n',
