@@ -78,6 +78,7 @@ test_that("aplos_import_jwt uses APLOS_JWT_FILE when no path is given", {
   AplosNCA:::.aplos_state_reset()
   path <- local_tempfile(fileext = ".token")
   writeLines("a.b.c", path)
+  Sys.chmod(path, mode = "0600")
 
   local_mocked_bindings(
     decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
@@ -94,6 +95,7 @@ test_that("aplos_import_jwt rejects expired, missing, and malformed tokens", {
 
   expired_path <- local_tempfile(fileext = ".token")
   writeLines("a.b.c", expired_path)
+  Sys.chmod(expired_path, mode = "0600")
   local_mocked_bindings(
     decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) - 60),
     .package = "AzureAuth"
@@ -104,6 +106,7 @@ test_that("aplos_import_jwt rejects expired, missing, and malformed tokens", {
 
   bad_path <- local_tempfile(fileext = ".token")
   writeLines("not-a-jwt", bad_path)
+  Sys.chmod(bad_path, mode = "0600")
   expect_error(aplos_import_jwt(bad_path), "not a valid Aplos NCA JWT")
 })
 
@@ -130,6 +133,7 @@ test_that("tokens inside the refresh window are refreshed transparently", {
     client_id = "client-1",
     region = "us-east-1"
   )
+  local_options(list(AplosNCA.debug = FALSE))
 
   refresh_calls <- 0L
   local_mocked_bindings(
@@ -346,6 +350,7 @@ test_that("imported token file paths are stored as absolute paths", {
   token <- "relative.path.token"
   path <- local_tempfile(fileext = ".token")
   writeLines(token, path)
+  Sys.chmod(path, mode = "0600")
 
   local_mocked_bindings(
     decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
@@ -371,7 +376,7 @@ test_that("refreshing an imported token does not repeat the permission warning",
     decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
     .package = "AzureAuth"
   )
-  local_options(list(AplosNCA.refresh_window_seconds = 7200))
+  local_options(list(AplosNCA.refresh_window_seconds = 7200, AplosNCA.debug = FALSE))
 
   expect_warning(
     expect_message(aplos_import_jwt(path), "Imported Aplos NCA JWT"),
@@ -386,6 +391,7 @@ test_that("a refresh token in the file enables automatic renewal", {
   new_token <- "sso.new.token"
   path <- local_tempfile(fileext = ".token")
   writeLines(c(old_token, "sso.refresh.token"), path)
+  Sys.chmod(path, mode = "0600")
 
   local_mocked_bindings(
     decode_jwt = function(token, ...) {
@@ -397,7 +403,7 @@ test_that("a refresh token in the file enables automatic renewal", {
     },
     .package = "AzureAuth"
   )
-  local_options(list(AplosNCA.refresh_window_seconds = 7200))
+  local_options(list(AplosNCA.refresh_window_seconds = 7200, AplosNCA.debug = FALSE))
 
   expect_message(
     aplos_import_jwt(path, client_id = "client-1", region = "us-east-1"),
@@ -440,6 +446,7 @@ test_that("key/value token files are parsed", {
     'COGNITO_CLIENT_KEY="client-9"',
     'COGNITO_REGION="us-west-2"'
   ), path)
+  Sys.chmod(path, mode = "0600")
 
   local_mocked_bindings(
     decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
@@ -459,6 +466,7 @@ test_that("a refresh token without client ID or region is ignored with a warning
   token <- "no.client.token"
   path <- local_tempfile(fileext = ".token")
   writeLines(c(token, "orphan.refresh.token"), path)
+  Sys.chmod(path, mode = "0600")
 
   local_mocked_bindings(
     decode_jwt = function(...) mock_claims(as.numeric(Sys.time()) + 3600),
@@ -479,6 +487,7 @@ test_that("a refresh-token-only file is exchanged for a JWT at import", {
   AplosNCA:::.aplos_state_reset()
   path <- local_tempfile(fileext = ".token")
   writeLines("opaque-refresh-value", path)
+  Sys.chmod(path, mode = "0600")
   minted <- "minted.id.token"
 
   local_mocked_bindings(
@@ -519,6 +528,7 @@ test_that("key/value files with only a refresh token work", {
     'COGNITO_CLIENT_KEY="client-7"',
     'COGNITO_REGION="us-west-2"'
   ), path)
+  Sys.chmod(path, mode = "0600")
   minted <- "kv.minted.token"
 
   local_mocked_bindings(
@@ -545,6 +555,7 @@ test_that("a refresh token without client settings gives a clear error", {
   AplosNCA:::.aplos_state_reset()
   path <- local_tempfile(fileext = ".token")
   writeLines("orphan-refresh-value", path)
+  Sys.chmod(path, mode = "0600")
   local_envvar(APLOS_COGNITO_CLIENT_ID = "", APLOS_COGNITO_REGION = "")
 
   expect_error(aplos_import_jwt(path), "not a valid Aplos NCA JWT")
@@ -554,6 +565,7 @@ test_that("a rejected refresh token is reported at import", {
   AplosNCA:::.aplos_state_reset()
   path <- local_tempfile(fileext = ".token")
   writeLines("bad-refresh-value", path)
+  Sys.chmod(path, mode = "0600")
 
   local_mocked_bindings(
     decode_jwt = function(...) NULL,

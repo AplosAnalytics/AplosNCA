@@ -37,6 +37,14 @@ test_that("aplos_download_results retrieves info with mock", {
     .package = "httr"
   )
 
+  local_mocked_bindings(
+    decode_jwt = function(...) list(payload = list(
+      `custom:aplos_user_tenant_id` = "fake_tenant",
+      `custom:aplos_user_id` = "fake_user"
+    )),
+    .package = "AzureAuth"
+  )
+
   df <- aplos_download_results(url = "https://api.example.com", token = "fake_token", execution_id = "fake_id")
   expect_s3_class(df, "data.frame")  # Expect data frame output
   expect_true(all(c("url", "filename") %in% names(df)))

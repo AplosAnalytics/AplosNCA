@@ -392,7 +392,10 @@
 
   .aplos_session_update(session, refreshed$token, refreshed$refresh_token)
 
-  if (isTRUE(getOption("AplosNCA.debug"))) {
+  # Re-reading a credential file that still holds the same JWT is not a
+  # refresh; keep the debug output honest and silent in that case.
+  if (isTRUE(getOption("AplosNCA.debug")) &&
+      !identical(refreshed$token, session$token)) {
     source <- if (!is.null(session$refresh_token)) "Aplos NCA Refresh Token" else "Aplos NCA credential file re-read"
     message("Aplos NCA JWT refreshed (", source, ").")
   }
